@@ -82,3 +82,17 @@ enum Role {
   USER
   ADMIN
 }
+
+model AuthLog {
+  id        String   @id @default(uuid())
+  email     String
+  action    String
+  ip        String?
+  timestamp DateTime @default(now())
+
+  @@index([email])
+  @@index([action])
+  @@index([timestamp])
+  @@index([email, timestamp])
+  @@map("auth_logs")
+}

@@ -5,7 +5,8 @@ export const taskSchema = z.object({
   description: z.string().max(2000, 'Description must be less than 2000 characters').optional().or(z.literal('')),
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']).optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
-  dueDate: z.string().optional().or(z.literal(''))
+  dueDate: z.string().optional().or(z.literal('')),
+  userId: z.string().optional()
 });
 
 export const loginSchema = z.object({

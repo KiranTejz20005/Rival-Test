@@ -3,7 +3,8 @@ import * as authService from '../services/authService';
 
 export const signup = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const result = await authService.signup(email, password);
+  const ip = req.ip || req.socket.remoteAddress;
+  const result = await authService.signup(email, password, ip);
   res.status(201).json({
     data: result,
     status: 'success',
@@ -13,7 +14,8 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const result = await authService.login(email, password);
+  const ip = req.ip || req.socket.remoteAddress;
+  const result = await authService.login(email, password, ip);
   res.status(200).json({
     data: result,
     status: 'success',
@@ -43,7 +45,9 @@ export const refresh = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  await authService.logout(userId);
+  const email = req.user!.email;
+  const ip = req.ip || req.socket.remoteAddress;
+  await authService.logout(userId, email, ip);
   res.status(200).json({
     message: 'Logged out successfully',
     status: 'success',

@@ -87,6 +87,23 @@ export const getStats = async (req: Request, res: Response) => {
   });
 };
 
+export const getAuthLogs = async (req: Request, res: Response) => {
+  const { email, action, page, pageSize } = req.query;
+
+  const result = await adminService.getAuthLogs({
+    email: email as string,
+    action: action as string,
+    page: page ? Number(page) : undefined,
+    pageSize: pageSize ? Number(pageSize) : undefined
+  });
+
+  res.status(200).json({
+    data: result,
+    status: 'success',
+    timestamp: new Date().toISOString()
+  });
+};
+
 export const getActivityLogs = async (req: Request, res: Response) => {
   const { action, page, pageSize } = req.query;
 

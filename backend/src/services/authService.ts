@@ -4,7 +4,15 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken, hashToke
 
 const prisma = new PrismaClient();
 
-export const signup = async (email: string, password: string) => {
+async function logAuthAction(email: string, action: string, ip?: string) {
+  try {
+    await prisma.authLog.create({ data: { email, action, ip: ip || null } });
+  } catch {
+    // Log failure should not break auth flow
+  }
+}
+
+export const signup = async (email: string, password: string, ip?: string) => {
   if (!validatePasswordStrength(password)) {
     throw { status: 400, message: 'Password must be at least 8 characters long and contain uppercase, lowercase, and numbers' };
   }
@@ -32,6 +40,8 @@ export const signup = async (email: string, password: string) => {
     data: { refreshTokenHash }
   });
 
+  await logAuthAction(email, 'SIGNUP', ip);
+
   return {
     user: { id: user.id, email: user.email, role: user.role },
     accessToken,
@@ -39,18 +49,21 @@ export const signup = async (email: string, password: string) => {
   };
 };
 
-export const login = async (email: string, password: string) => {
+export const login = async (email: string, password: string, ip?: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
+    await logAuthAction(email, 'LOGIN_FAILED', ip);
     throw { status: 401, message: 'Invalid credentials' };
   }
 
   if (!user.isActive) {
+    await logAuthAction(email, 'LOGIN_FAILED', ip);
     throw { status: 403, message: 'Account has been deactivated' };
   }
 
   const isPasswordValid = await comparePassword(password, user.passwordHash);
   if (!isPasswordValid) {
+    await logAuthAction(email, 'LOGIN_FAILED', ip);
     throw { status: 401, message: 'Invalid credentials' };
   }
 
@@ -62,6 +75,8 @@ export const login = async (email: string, password: string) => {
     where: { id: user.id },
     data: { refreshTokenHash }
   });
+
+  await logAuthAction(email, 'LOGIN_SUCCESS', ip);
 
   return {
     user: { id: user.id, email: user.email, role: user.role },
@@ -104,11 +119,12 @@ export const refresh = async (oldRefreshToken: string) => {
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
-export const logout = async (userId: string) => {
+export const logout = async (userId: string, email: string, ip?: string) => {
   await prisma.user.update({
     where: { id: userId },
     data: { refreshTokenHash: null }
   });
+  await logAuthAction(email, 'LOGOUT', ip);
 };
 
 export const getUserById = async (id: string) => {

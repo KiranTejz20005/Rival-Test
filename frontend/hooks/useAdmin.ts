@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
-import { User, Task, AdminStats, ActivityLog } from '../types';
+import { User, Task, AdminStats, ActivityLog, AuthLog } from '../types';
 
 export function useAdminStats() {
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -139,6 +139,36 @@ export function useAdminUpdateUser() {
   };
 
   return { update, isLoading, error };
+}
+
+export function useAdminAuthLogs(filters: {
+  email?: string;
+  action?: string;
+  page?: number;
+  pageSize?: number;
+} = {}) {
+  const [logs, setLogs] = useState<AuthLog[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get('/api/admin/auth-logs', { params: filters });
+      setLogs(data.data.logs);
+      setTotal(data.data.total);
+      setError(null);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to load auth logs');
+    } finally {
+      setLoading(false);
+    }
+  }, [filters.email, filters.action, filters.page, filters.pageSize]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { logs, total, isLoading, error, refetch: fetch };
 }
 
 export function useAdminDeleteUser() {

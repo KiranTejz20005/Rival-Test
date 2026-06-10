@@ -31,6 +31,12 @@ export interface CreateTaskRequest {
   status?: string;
   priority?: string;
   dueDate?: string;
+  userId?: string;
+}
+
+export interface UserOption {
+  id: string;
+  email: string;
 }
 
 export interface ApiResponse<T> {
@@ -54,7 +60,6 @@ export interface TaskFilters {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: string;
-  allUsers?: boolean;
 }
 
 export interface AdminStats {
@@ -63,6 +68,7 @@ export interface AdminStats {
   completedTasks: number;
   pendingTasks: number;
   highPriorityTasks: number;
+  overdueTasks: number;
   recentActivity: ActivityLog[];
 }
 
@@ -76,6 +82,14 @@ export interface ActivityLog {
     title: string;
     userId: string;
   };
+}
+
+export interface AuthLog {
+  id: string;
+  email: string;
+  action: string;
+  ip: string | null;
+  timestamp: string;
 }
 
 export interface PaginatedResult<T> {

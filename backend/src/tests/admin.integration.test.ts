@@ -68,6 +68,7 @@ describe('Admin Endpoints', () => {
       expect(res.body.data).toHaveProperty('totalTasks');
       expect(res.body.data).toHaveProperty('completedTasks');
       expect(res.body.data).toHaveProperty('pendingTasks');
+      expect(res.body.data).toHaveProperty('overdueTasks');
     });
 
     it('rejects non-admin users', async () => {

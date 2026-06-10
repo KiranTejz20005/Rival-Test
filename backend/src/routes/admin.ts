@@ -16,5 +16,6 @@ router.delete('/users/:id', adminController.deleteUser);
 
 router.get('/stats', adminController.getStats);
 router.get('/activity', adminController.getActivityLogs);
+router.get('/auth-logs', adminController.getAuthLogs);
 
 export default router;

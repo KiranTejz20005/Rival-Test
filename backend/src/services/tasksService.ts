@@ -20,7 +20,6 @@ interface TaskFilters {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   pageSize?: number;
-  allUsers?: boolean;
 }
 
 export const createTask = async (data: TaskCreateData) => {
@@ -46,8 +45,7 @@ export const getTasks = async (userId: string, role: string, filters: TaskFilter
 
   const where: any = {};
   
-  // Only restrict by userId if not admin or if admin has not asked to view all users' tasks
-  if (role !== 'ADMIN' || !filters.allUsers) {
+  if (role !== 'ADMIN') {
     where.userId = userId;
   }
   

@@ -20,7 +20,7 @@ export function useTasks(filters: TaskFilters = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters.status, filters.priority, filters.search, filters.page, filters.sortBy, filters.sortOrder, filters.allUsers]);
+  }, [filters.status, filters.priority, filters.search, filters.page, filters.sortBy, filters.sortOrder]);
 
   useEffect(() => {
     fetchTasks();

@@ -5,11 +5,36 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 import authRoutes from './routes/auth';
 import tasksRoutes from './routes/tasks';
 import adminRoutes from './routes/admin';
 import { errorHandler } from './middleware/errorHandler';
+
+const prisma = new PrismaClient();
+
+async function bootstrapAdmin() {
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  if (!email || !password) return;
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    if (existing.role !== 'ADMIN') {
+      await prisma.user.update({ where: { email }, data: { role: 'ADMIN' } });
+      console.log(`Admin bootstrap: upgraded ${email} to ADMIN`);
+    }
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.user.create({
+    data: { email, passwordHash, role: 'ADMIN' }
+  });
+  console.log(`Admin bootstrap: created admin user ${email}`);
+}
 
 const app = express();
 
@@ -45,8 +70,10 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  bootstrapAdmin().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
   });
 }
 

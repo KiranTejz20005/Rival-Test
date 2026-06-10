@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { taskSchema } from '../lib/validation';
 import { z } from 'zod';
 import clsx from 'clsx';
-import { CreateTaskRequest, Task } from '../types';
-import { X } from 'lucide-react';
+import { CreateTaskRequest, Task, UserOption } from '../types';
+import { X, User } from 'lucide-react';
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
@@ -13,9 +13,11 @@ interface TaskFormProps {
   initialData?: Task;
   onSubmit: (data: CreateTaskRequest) => Promise<void>;
   onClose: () => void;
+  users?: UserOption[];
+  isAdmin?: boolean;
 }
 
-export default function TaskForm({ initialData, onSubmit, onClose }: TaskFormProps) {
+export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmin }: TaskFormProps) {
   const isEdit = !!initialData;
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<TaskFormValues>({
@@ -25,7 +27,8 @@ export default function TaskForm({ initialData, onSubmit, onClose }: TaskFormPro
       description: initialData?.description || '',
       status: initialData?.status || 'TODO',
       priority: initialData?.priority || 'MEDIUM',
-      dueDate: initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : ''
+      dueDate: initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '',
+      userId: initialData?.userId || (isAdmin ? '' : undefined)
     }
   });
 
@@ -33,7 +36,8 @@ export default function TaskForm({ initialData, onSubmit, onClose }: TaskFormPro
     try {
       await onSubmit({
         ...data,
-        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
+        userId: isAdmin && data.userId ? data.userId : undefined
       });
     } catch (error) {
       // Error handled by parent
@@ -103,14 +107,23 @@ export default function TaskForm({ initialData, onSubmit, onClose }: TaskFormPro
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Due Date</label>
-            <input
-              type="date"
-              {...register('dueDate')}
-              className={inputClasses}
-            />
-          </div>
+          {isAdmin && users && (
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                <User className="w-3 h-3" />
+                Assign to User
+              </label>
+              <select
+                {...register('userId')}
+                className={inputClasses}
+              >
+                <option value="">{initialData ? 'Keep current owner' : 'Select a user...'}</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>{u.email}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-neutral-100 dark:border-neutral-800/60">
             <button

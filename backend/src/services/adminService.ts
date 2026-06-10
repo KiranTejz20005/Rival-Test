@@ -164,11 +164,13 @@ export const deleteUser = async (userId: string, requestingUserId: string) => {
 };
 
 export const getStats = async () => {
-  const [totalUsers, totalTasks, completedTasks, highPriorityTasks, recentActivity] = await Promise.all([
+  const now = new Date();
+  const [totalUsers, totalTasks, completedTasks, highPriorityTasks, overdueTasks, recentActivity] = await Promise.all([
     prisma.user.count(),
     prisma.task.count(),
     prisma.task.count({ where: { status: 'DONE' as Status } }),
     prisma.task.count({ where: { priority: 'HIGH', status: { not: 'DONE' as Status } } }),
+    prisma.task.count({ where: { status: { not: 'DONE' as Status }, dueDate: { lt: now } } }),
     prisma.activityLog.findMany({
       orderBy: { timestamp: 'desc' },
       take: 20,
@@ -188,6 +190,7 @@ export const getStats = async () => {
     completedTasks,
     pendingTasks,
     highPriorityTasks,
+    overdueTasks,
     recentActivity
   };
 };
@@ -217,6 +220,33 @@ export const getActivityLogs = async (filters: {
       }
     }),
     prisma.activityLog.count({ where })
+  ]);
+
+  return { logs, total, page, pageSize };
+};
+
+export const getAuthLogs = async (filters: {
+  email?: string;
+  action?: string;
+  page?: number;
+  pageSize?: number;
+}) => {
+  const page = Number(filters.page) || 1;
+  const pageSize = Number(filters.pageSize) || 50;
+  const skip = (page - 1) * pageSize;
+
+  const where: any = {};
+  if (filters.email) where.email = { contains: filters.email, mode: 'insensitive' };
+  if (filters.action) where.action = filters.action;
+
+  const [logs, total] = await Promise.all([
+    prisma.authLog.findMany({
+      where,
+      orderBy: { timestamp: 'desc' },
+      skip,
+      take: pageSize
+    }),
+    prisma.authLog.count({ where })
   ]);
 
   return { logs, total, page, pageSize };

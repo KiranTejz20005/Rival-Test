@@ -190,13 +190,14 @@ describe('Authorization & Penetration Tests', () => {
       expect(res.body.data.title).toBe('User A Private Task');
     });
 
-    it('admin can view all users tasks via allUsers flag', async () => {
+    it('admin can view all users tasks without any flag', async () => {
       const res = await request(app)
-        .get('/api/tasks?allUsers=true')
+        .get('/api/tasks')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.data.tasks.length).toBeGreaterThan(0);
+      expect(res.body.data.tasks[0].title).toBe('User A Private Task');
     });
 
     it('regular user cannot access admin routes', async () => {

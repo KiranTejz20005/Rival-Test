@@ -5,7 +5,8 @@ export const taskCreateSchema = Joi.object({
   description: Joi.string().max(2000).optional().allow('', null),
   status: Joi.string().valid('TODO', 'IN_PROGRESS', 'DONE').optional(),
   priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH').optional(),
-  dueDate: Joi.date().iso().optional().allow(null)
+  dueDate: Joi.date().iso().optional().allow(null),
+  userId: Joi.string().uuid().optional()
 });
 
 export const taskUpdateSchema = taskCreateSchema.fork(

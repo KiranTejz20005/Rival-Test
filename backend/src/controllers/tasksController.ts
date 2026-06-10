@@ -1,14 +1,26 @@
 import { Request, Response } from 'express';
+import { PrismaClient, Status, Priority } from '@prisma/client';
 import * as tasksService from '../services/tasksService';
 import * as activityService from '../services/activityService';
-import { Status, Priority } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const createTask = async (req: Request, res: Response) => {
-  const userId = req.user!.id;
-  const { title, description, status, priority, dueDate } = req.body;
+  const authenticatedUserId = req.user!.id;
+  const role = req.user!.role;
+  const { title, description, status, priority, dueDate, userId } = req.body;
+  
+  const targetUserId = (role === 'ADMIN' && userId) ? userId : authenticatedUserId;
+  
+  if (role === 'ADMIN' && userId) {
+    const userExists = await prisma.user.findUnique({ where: { id: userId } });
+    if (!userExists) {
+      return res.status(404).json({ error: 'User not found', status: 404, timestamp: new Date().toISOString() });
+    }
+  }
   
   const task = await tasksService.createTask({
-    userId,
+    userId: targetUserId,
     title,
     description,
     status: status as Status,
@@ -26,7 +38,7 @@ export const createTask = async (req: Request, res: Response) => {
 export const getTasks = async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const role = req.user!.role;
-  const { status, priority, search, sortBy, sortOrder, page, pageSize, allUsers } = req.query;
+  const { status, priority, search, sortBy, sortOrder, page, pageSize } = req.query;
   
   const result = await tasksService.getTasks(userId, role, {
     status: status as Status,
@@ -35,8 +47,7 @@ export const getTasks = async (req: Request, res: Response) => {
     sortBy: sortBy as string,
     sortOrder: sortOrder as 'asc' | 'desc',
     page: page ? Number(page) : undefined,
-    pageSize: pageSize ? Number(pageSize) : undefined,
-    allUsers: allUsers === 'true'
+    pageSize: pageSize ? Number(pageSize) : undefined
   });
   
   res.status(200).json({
@@ -65,8 +76,17 @@ export const updateTask = async (req: Request, res: Response) => {
   const role = req.user!.role;
   const taskId = req.params.id;
   
-  const updates = { ...req.body };
+  const updates: any = { ...req.body };
   if (updates.dueDate) updates.dueDate = new Date(updates.dueDate);
+  
+  if (role === 'ADMIN' && updates.userId) {
+    const userExists = await prisma.user.findUnique({ where: { id: updates.userId } });
+    if (!userExists) {
+      return res.status(404).json({ error: 'User not found', status: 404, timestamp: new Date().toISOString() });
+    }
+  } else {
+    delete updates.userId;
+  }
   
   const task = await tasksService.updateTask(taskId, userId, role, updates);
   

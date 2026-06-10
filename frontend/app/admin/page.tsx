@@ -2,15 +2,37 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useAdminStats, useAdminActivity } from '../../hooks/useAdmin';
+import { useAdminStats, useAdminActivity, useAdminAuthLogs } from '../../hooks/useAdmin';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, ArrowLeft, Activity, UserPlus, ListTodo } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, ArrowLeft, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck } from 'lucide-react';
+
+function actionIcon(action: string) {
+  switch (action) {
+    case 'LOGIN_SUCCESS': return <LogIn className="w-3.5 h-3.5 text-green-500" />;
+    case 'LOGIN_FAILED': return <Ban className="w-3.5 h-3.5 text-red-500" />;
+    case 'LOGOUT': return <LogOut className="w-3.5 h-3.5 text-neutral-500" />;
+    case 'SIGNUP': return <UserPlus className="w-3.5 h-3.5 text-blue-500" />;
+    default: return <Activity className="w-3.5 h-3.5 text-neutral-400" />;
+  }
+}
+
+function actionLabel(action: string) {
+  switch (action) {
+    case 'LOGIN_SUCCESS': return 'Logged in';
+    case 'LOGIN_FAILED': return 'Failed login';
+    case 'LOGOUT': return 'Logged out';
+    case 'SIGNUP': return 'Signed up';
+    default: return action;
+  }
+}
 
 export default function AdminDashboard() {
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
+  const { logs: authLogs, isLoading: authLogsLoading } = useAdminAuthLogs({ pageSize: 10 });
+  const [tab, setTab] = useState<'activity' | 'logins'>('activity');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -30,6 +52,7 @@ export default function AdminDashboard() {
     { label: 'Completed', value: stats?.completedTasks ?? 0, icon: CheckCircle, color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800/50' },
     { label: 'Pending', value: stats?.pendingTasks ?? 0, icon: Clock, color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/50' },
     { label: 'High Priority', value: stats?.highPriorityTasks ?? 0, icon: AlertTriangle, color: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/50' },
+    { label: 'Overdue', value: stats?.overdueTasks ?? 0, icon: AlertTriangle, color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/50' },
   ];
 
   return (
@@ -79,7 +102,7 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
               {cards.map((card) => (
                 <div key={card.label} className={`rounded-xl border p-4 ${card.color} bg-white dark:bg-neutral-900 shadow-sm`}>
                   <div className="flex items-center gap-2 mb-2">
@@ -91,36 +114,12 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Quick Actions + Admin Management */}
               <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <Activity className="w-5 h-5 text-neutral-500" />
-                  <h2 className="text-lg font-bold">Recent Activity</h2>
-                </div>
-                {stats?.recentActivity && stats.recentActivity.length > 0 ? (
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                    {stats.recentActivity.slice(0, 10).map((log) => (
-                      <div key={log.id} className="flex items-start gap-3 pb-3 border-b border-neutral-100 dark:border-neutral-800/60 last:border-0">
-                        <div className="w-2 h-2 rounded-full bg-neutral-400 mt-2 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            Task <span className="capitalize">{log.action}</span>
-                            {log.task?.title && <span className="text-neutral-500"> &mdash; {log.task.title}</span>}
-                          </p>
-                          <p className="text-xs text-neutral-500 mt-0.5">{new Date(log.timestamp).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-neutral-500 text-sm">No recent activity</p>
-                )}
-              </div>
-
-              <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <ListTodo className="w-5 h-5 text-neutral-500" />
-                  <h2 className="text-lg font-bold">Quick Actions</h2>
+                  <Shield className="w-5 h-5 text-neutral-500" />
+                  <h2 className="text-lg font-bold">Admin Actions</h2>
                 </div>
                 <div className="space-y-3">
                   <button
@@ -130,7 +129,7 @@ export default function AdminDashboard() {
                     <Users className="w-5 h-5 text-blue-500" />
                     <div>
                       <p className="text-sm font-semibold">Manage Users</p>
-                      <p className="text-xs text-neutral-500">View, search, and manage all users</p>
+                      <p className="text-xs text-neutral-500">Promote to admin, deactivate, delete</p>
                     </div>
                   </button>
                   <button
@@ -143,6 +142,92 @@ export default function AdminDashboard() {
                       <p className="text-xs text-neutral-500">View and manage all tasks</p>
                     </div>
                   </button>
+
+                  <div className="border-t border-neutral-100 dark:border-neutral-800 pt-4 mt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <UserCheck className="w-4 h-4 text-indigo-500" />
+                      <span className="text-sm font-bold uppercase tracking-wider text-neutral-500">Role Management</span>
+                    </div>
+                    <p className="text-xs text-neutral-500 leading-relaxed">
+                      To assign the <strong className="text-indigo-600 dark:text-indigo-400">ADMIN</strong> role to a user, go to <strong>Manage Users</strong>, find the user, and click the <Shield className="w-3 h-3 inline" /> icon to toggle their role.
+                    </p>
+                    <p className="text-xs text-neutral-500 leading-relaxed mt-2">
+                      The first admin can also be bootstrapped by setting <code className="bg-neutral-100 dark:bg-neutral-800 px-1 rounded text-xs">ADMIN_EMAIL</code> and <code className="bg-neutral-100 dark:bg-neutral-800 px-1 rounded text-xs">ADMIN_PASSWORD</code> environment variables on startup.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Activity feed with tabs */}
+              <div className="lg:col-span-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm overflow-hidden">
+                <div className="flex border-b border-neutral-200 dark:border-neutral-800">
+                  <button
+                    onClick={() => setTab('activity')}
+                    className={`flex-1 px-4 py-3 text-sm font-semibold text-center transition ${tab === 'activity' ? 'bg-neutral-50 dark:bg-neutral-800/50 text-neutral-900 dark:text-neutral-100 border-b-2 border-indigo-500' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                    <Activity className="w-4 h-4 inline mr-1.5" />
+                    Task Activity
+                  </button>
+                  <button
+                    onClick={() => setTab('logins')}
+                    className={`flex-1 px-4 py-3 text-sm font-semibold text-center transition ${tab === 'logins' ? 'bg-neutral-50 dark:bg-neutral-800/50 text-neutral-900 dark:text-neutral-100 border-b-2 border-indigo-500' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                    <LogIn className="w-4 h-4 inline mr-1.5" />
+                    Login Activity
+                  </button>
+                </div>
+
+                <div className="p-6">
+                  {tab === 'activity' ? (
+                    <>
+                      {stats?.recentActivity && stats.recentActivity.length > 0 ? (
+                        <div className="space-y-3 max-h-[360px] overflow-y-auto">
+                          {stats.recentActivity.slice(0, 10).map((log) => (
+                            <div key={log.id} className="flex items-start gap-3 pb-3 border-b border-neutral-100 dark:border-neutral-800/60 last:border-0">
+                              <div className="w-2 h-2 rounded-full bg-neutral-400 mt-2 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  Task <span className="capitalize">{log.action}</span>
+                                  {log.task?.title && <span className="text-neutral-500"> &mdash; {log.task.title}</span>}
+                                </p>
+                                <p className="text-xs text-neutral-500 mt-0.5">{new Date(log.timestamp).toLocaleString()}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-neutral-500 text-sm py-8 text-center">No recent activity</p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {authLogsLoading ? (
+                        <LoadingSpinner />
+                      ) : authLogs.length > 0 ? (
+                        <div className="space-y-3 max-h-[360px] overflow-y-auto">
+                          {authLogs.map((log) => (
+                            <div key={log.id} className="flex items-start gap-3 pb-3 border-b border-neutral-100 dark:border-neutral-800/60 last:border-0">
+                              <div className="mt-1 shrink-0">{actionIcon(log.action)}</div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  <span className={log.action === 'LOGIN_FAILED' ? 'text-red-600 dark:text-red-400' : log.action === 'LOGIN_SUCCESS' ? 'text-green-600 dark:text-green-400' : ''}>
+                                    {log.email}
+                                  </span>
+                                  <span className="text-neutral-500 font-normal"> {actionLabel(log.action)}</span>
+                                </p>
+                                <p className="text-xs text-neutral-500 mt-0.5">
+                                  {new Date(log.timestamp).toLocaleString()}
+                                  {log.ip && <span className="ml-2 font-mono">({log.ip})</span>}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-neutral-500 text-sm py-8 text-center">No login activity recorded yet</p>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>

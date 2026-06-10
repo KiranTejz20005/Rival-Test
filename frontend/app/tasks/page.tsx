@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTasks, useDeleteTask, useUpdateTask, useCreateTask } from '../../hooks/useTasks';
 import { useToast } from '../../hooks/useToast';
 import { useRouter } from 'next/navigation';
+import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import TaskList from '../../components/TaskList';
 import TaskFilters from '../../components/TaskFilters';
@@ -13,7 +14,7 @@ import Pagination from '../../components/Pagination';
 import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
 import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle, Shield } from 'lucide-react';
-import { Task, CreateTaskRequest } from '../../types';
+import { Task, CreateTaskRequest, UserOption } from '../../types';
 import clsx from 'clsx';
 
 export default function TasksPage() {
@@ -27,7 +28,6 @@ export default function TasksPage() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [allUsers, setAllUsers] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const pageSize = 20;
 
@@ -35,6 +35,15 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [historyTask, setHistoryTask] = useState<Task | undefined>(undefined);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [users, setUsers] = useState<UserOption[]>([]);
+
+  useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      api.get('/api/admin/users', { params: { pageSize: 100 } }).then(({ data }) => {
+        setUsers(data.data.users.map((u: any) => ({ id: u.id, email: u.email })));
+      }).catch(() => {});
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const isDark = localStorage.getItem('theme') === 'dark';
@@ -76,8 +85,7 @@ export default function TasksPage() {
     page,
     pageSize,
     sortBy,
-    sortOrder,
-    allUsers
+    sortOrder
   });
 
   const { delete: deleteTask } = useDeleteTask();
@@ -150,15 +158,10 @@ export default function TasksPage() {
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
             {user?.role === 'ADMIN' && (
               <>
-                <label className="flex items-center gap-2 cursor-pointer bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-2.5 py-1.5 rounded-lg font-medium whitespace-nowrap">
-                  <input 
-                    type="checkbox" 
-                    checked={allUsers} 
-                    onChange={(e) => { setAllUsers(e.target.checked); setPage(1); }} 
-                    className="rounded text-neutral-900 focus:ring-neutral-500 border-neutral-300 dark:border-neutral-700 bg-transparent"
-                  />
-                  Admin Mode
-                </label>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 px-2.5 py-1.5 rounded-lg whitespace-nowrap">
+                  <Shield className="w-3.5 h-3.5" />
+                  Viewing all tasks
+                </span>
                 <button
                   onClick={() => router.push('/admin')}
                   className="flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 px-2.5 py-1.5 rounded-lg transition gap-1.5 border border-indigo-200 dark:border-indigo-800/50"
@@ -282,7 +285,7 @@ export default function TasksPage() {
                       <th className="py-3.5 px-4 font-semibold">Status</th>
                       <th className="py-3.5 px-4 font-semibold">Priority</th>
                       <th className="py-3.5 px-4 font-semibold">Due Date</th>
-                      {allUsers && <th className="py-3.5 px-4 font-semibold">Owner</th>}
+                      {user?.role === 'ADMIN' && <th className="py-3.5 px-4 font-semibold">Owner</th>}
                       <th className="py-3.5 px-6 text-right font-semibold">Actions</th>
                     </tr>
                   </thead>
@@ -344,7 +347,7 @@ export default function TasksPage() {
                               <span className="text-neutral-400 dark:text-neutral-600 text-xs">-</span>
                             )}
                           </td>
-                          {allUsers && (
+                          {user?.role === 'ADMIN' && (
                             <td className="py-4 px-4 text-xs text-neutral-500 dark:text-neutral-400 max-w-[120px] truncate">
                               {task.user?.email || 'Unknown'}
                             </td>
@@ -403,10 +406,12 @@ export default function TasksPage() {
       </main>
 
       {isFormOpen && (
-        <TaskForm 
-          initialData={editingTask} 
-          onSubmit={handleFormSubmit} 
-          onClose={() => { setIsFormOpen(false); setEditingTask(undefined); }} 
+        <TaskForm
+          initialData={editingTask}
+          onSubmit={handleFormSubmit}
+          onClose={() => { setIsFormOpen(false); setEditingTask(undefined); }}
+          users={user?.role === 'ADMIN' ? users : undefined}
+          isAdmin={user?.role === 'ADMIN'}
         />
       )}
 
