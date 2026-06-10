@@ -161,11 +161,11 @@ export const deleteTask = async (taskId: string, userId: string, role: string) =
 
   const taskSnapshot = { title: task.title, status: task.status, priority: task.priority };
 
+  await activityService.logTaskDeleted(taskId, taskSnapshot);
+
   await prisma.task.delete({
     where: { id: taskId }
   });
-
-  await activityService.logTaskDeleted(taskId, taskSnapshot);
   
   return true;
 };

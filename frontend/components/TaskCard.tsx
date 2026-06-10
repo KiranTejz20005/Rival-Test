@@ -15,7 +15,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onVie
   const dueSoon = task.dueDate && new Date(task.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000 && task.status !== 'DONE';
 
   return (
-    <div className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 hover:border-neutral-400 dark:hover:border-neutral-600 hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-[180px]">
+    <div className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 hover:border-neutral-400 dark:hover:border-neutral-600 hover:shadow-sm hover:shadow-neutral-200 dark:hover:shadow-none transition-all duration-300 flex flex-col justify-between h-[180px]">
       <div>
         <div className="flex justify-between items-start gap-3">
           <h3 className={clsx("font-semibold text-neutral-900 dark:text-neutral-50 tracking-tight line-clamp-1 text-base", {

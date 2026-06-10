@@ -5,6 +5,7 @@ import { AuthProvider } from "../hooks/useAuth";
 import { ToastProvider } from "../hooks/useToast";
 import Toast from "../components/Toast";
 import ErrorBoundary from "../components/ErrorBoundary";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head />
       <body className={inter.className} suppressHydrationWarning>
+        <Script id="theme-script" strategy="beforeInteractive">
+          {`
+            try {
+              if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            } catch (_) {}
+          `}
+        </Script>
         <ErrorBoundary>
           <ToastProvider>
             <AuthProvider>
