@@ -3,9 +3,10 @@ import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
   onSearch: (value: string) => void;
+  placeholder?: string;
 }
 
-export default function SearchBar({ onSearch }: SearchBarProps) {
+export default function SearchBar({ onSearch, placeholder = "Search tasks by title..." }: SearchBarProps) {
   const [value, setValue] = useState('');
 
   useEffect(() => {
@@ -22,8 +23,8 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
       </div>
       <input
         type="text"
-        className="block w-full pl-10 pr-10 py-2 border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 placeholder-neutral-400 dark:placeholder-neutral-500 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:ring-1 focus:ring-neutral-950 dark:focus:ring-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700 transition duration-200 shadow-sm"
-        placeholder="Search tasks by title..."
+        className="block w-full pl-10 pr-10 py-2 border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 placeholder-neutral-400 dark:placeholder-neutral-500 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:border-neutral-350 dark:focus:border-neutral-700 transition duration-200 shadow-sm"
+        placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
