@@ -26,7 +26,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onVie
           <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button 
               onClick={() => onToggleStatus(task)} 
-              className={clsx("p-1 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition", { 
+              className={clsx("p-1 rounded-md hover:bg-neutral-105 dark:hover:bg-neutral-800 transition", { 
                 "text-green-600": task.status === 'DONE', 
                 "text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100": task.status !== 'DONE' 
               })}
@@ -36,21 +36,21 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onVie
             </button>
             <button 
               onClick={() => onViewHistory(task)} 
-              className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" 
+              className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-md hover:bg-neutral-105 dark:hover:bg-neutral-800 transition" 
               title="View History"
             >
               <Calendar className="w-4 h-4" />
             </button>
             <button 
               onClick={() => onEdit(task)} 
-              className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" 
+              className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-md hover:bg-neutral-105 dark:hover:bg-neutral-800 transition" 
               title="Edit"
             >
               <Edit2 className="w-3.5 h-3.5" />
             </button>
             <button 
               onClick={() => onDelete(task.id)} 
-              className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" 
+              className="p-1 text-neutral-400 dark:text-neutral-500 hover:text-red-650 rounded-md hover:bg-red-500/10 dark:hover:bg-red-500/20 transition" 
               title="Delete"
             >
               <Trash2 className="w-3.5 h-3.5" />

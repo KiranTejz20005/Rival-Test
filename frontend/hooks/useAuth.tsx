@@ -10,7 +10,7 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -71,7 +71,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch {
+      // Proceed with local cleanup even if server request fails
+    }
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     setUser(null);

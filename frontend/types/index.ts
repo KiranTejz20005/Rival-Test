@@ -2,6 +2,12 @@ export interface User {
   id: string;
   email: string;
   role?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  _count?: {
+    tasks: number;
+  };
 }
 
 export interface Task {
@@ -49,4 +55,32 @@ export interface TaskFilters {
   sortBy?: string;
   sortOrder?: string;
   allUsers?: boolean;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  highPriorityTasks: number;
+  recentActivity: ActivityLog[];
+}
+
+export interface ActivityLog {
+  id: string;
+  taskId: string;
+  action: string;
+  changes?: any;
+  timestamp: string;
+  task?: {
+    title: string;
+    userId: string;
+  };
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

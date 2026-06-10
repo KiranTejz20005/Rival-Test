@@ -16,7 +16,17 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    if (error.response?.status === 401 && typeof window !== 'undefined' && !error.config._retry) {
+      if (error.config.url === '/api/auth/refresh') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        if (window.location.pathname !== '/auth') {
+          window.location.href = '/auth';
+        }
+        return Promise.reject(error);
+      }
+
+      error.config._retry = true;
       try {
         const refresh = localStorage.getItem('refreshToken');
         if (!refresh) throw new Error('No refresh token');
@@ -26,6 +36,9 @@ api.interceptors.response.use(
         });
         
         localStorage.setItem('accessToken', data.data.accessToken);
+        if (data.data.refreshToken) {
+          localStorage.setItem('refreshToken', data.data.refreshToken);
+        }
         
         error.config.headers.Authorization = `Bearer ${data.data.accessToken}`;
         return api(error.config);
@@ -35,6 +48,11 @@ api.interceptors.response.use(
         if (window.location.pathname !== '/auth') {
           window.location.href = '/auth';
         }
+      }
+    }
+    if (error.response?.status === 403 && typeof window !== 'undefined') {
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/tasks';
       }
     }
     return Promise.reject(error);

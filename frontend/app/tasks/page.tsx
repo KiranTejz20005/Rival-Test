@@ -12,7 +12,7 @@ import SearchBar from '../../components/SearchBar';
 import Pagination from '../../components/Pagination';
 import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
-import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
+import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { Task, CreateTaskRequest } from '../../types';
 import clsx from 'clsx';
 
@@ -91,8 +91,8 @@ export default function TasksPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push('/auth');
   };
 
@@ -150,15 +150,24 @@ export default function TasksPage() {
           </div>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
             {user?.role === 'ADMIN' && (
-              <label className="flex items-center gap-2 cursor-pointer bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-2.5 py-1.5 rounded-lg font-medium whitespace-nowrap">
-                <input 
-                  type="checkbox" 
-                  checked={allUsers} 
-                  onChange={(e) => { setAllUsers(e.target.checked); setPage(1); }} 
-                  className="rounded text-neutral-900 focus:ring-neutral-500 border-neutral-300 dark:border-neutral-700 bg-transparent"
-                />
-                Admin Mode
-              </label>
+              <>
+                <label className="flex items-center gap-2 cursor-pointer bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-2.5 py-1.5 rounded-lg font-medium whitespace-nowrap">
+                  <input 
+                    type="checkbox" 
+                    checked={allUsers} 
+                    onChange={(e) => { setAllUsers(e.target.checked); setPage(1); }} 
+                    className="rounded text-neutral-900 focus:ring-neutral-500 border-neutral-300 dark:border-neutral-700 bg-transparent"
+                  />
+                  Admin Mode
+                </label>
+                <button
+                  onClick={() => router.push('/admin')}
+                  className="flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 px-2.5 py-1.5 rounded-lg transition gap-1.5 border border-indigo-200 dark:border-indigo-800/50"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
+                </button>
+              </>
             )}
             <button
               onClick={toggleDarkMode}
