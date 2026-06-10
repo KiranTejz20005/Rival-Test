@@ -20,6 +20,7 @@ interface TaskFilters {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   pageSize?: number;
+  allUsers?: boolean;
 }
 
 export const createTask = async (data: TaskCreateData) => {
@@ -38,12 +39,17 @@ export const createTask = async (data: TaskCreateData) => {
   return task;
 };
 
-export const getTasks = async (userId: string, filters: TaskFilters) => {
+export const getTasks = async (userId: string, role: string, filters: TaskFilters) => {
   const page = Number(filters.page) || 1;
   const pageSize = Number(filters.pageSize) || 20;
   const skip = (page - 1) * pageSize;
 
-  const where: any = { userId };
+  const where: any = {};
+  
+  // Only restrict by userId if not admin or if admin has not asked to view all users' tasks
+  if (role !== 'ADMIN' || !filters.allUsers) {
+    where.userId = userId;
+  }
   
   if (filters.status) where.status = filters.status;
   if (filters.priority) where.priority = filters.priority;
@@ -61,7 +67,14 @@ export const getTasks = async (userId: string, filters: TaskFilters) => {
       where,
       orderBy,
       skip,
-      take: pageSize
+      take: pageSize,
+      include: {
+        user: {
+          select: {
+            email: true
+          }
+        }
+      }
     }),
     prisma.task.count({ where })
   ]);
@@ -69,9 +82,21 @@ export const getTasks = async (userId: string, filters: TaskFilters) => {
   return { tasks, total, page, pageSize };
 };
 
-export const getTask = async (taskId: string, userId: string) => {
+export const getTask = async (taskId: string, userId: string, role: string) => {
+  const where: any = { id: taskId };
+  if (role !== 'ADMIN') {
+    where.userId = userId;
+  }
+
   const task = await prisma.task.findFirst({
-    where: { id: taskId, userId }
+    where,
+    include: {
+      user: {
+        select: {
+          email: true
+        }
+      }
+    }
   });
   
   if (!task) {
@@ -81,9 +106,14 @@ export const getTask = async (taskId: string, userId: string) => {
   return task;
 };
 
-export const updateTask = async (taskId: string, userId: string, updates: Partial<TaskCreateData>) => {
+export const updateTask = async (taskId: string, userId: string, role: string, updates: Partial<TaskCreateData>) => {
+  const where: any = { id: taskId };
+  if (role !== 'ADMIN') {
+    where.userId = userId;
+  }
+
   const oldTask = await prisma.task.findFirst({
-    where: { id: taskId, userId }
+    where
   });
 
   if (!oldTask) {
@@ -115,9 +145,14 @@ export const updateTask = async (taskId: string, userId: string, updates: Partia
   return updatedTask;
 };
 
-export const deleteTask = async (taskId: string, userId: string) => {
+export const deleteTask = async (taskId: string, userId: string, role: string) => {
+  const where: any = { id: taskId };
+  if (role !== 'ADMIN') {
+    where.userId = userId;
+  }
+
   const task = await prisma.task.findFirst({
-    where: { id: taskId, userId }
+    where
   });
 
   if (!task) {
@@ -127,12 +162,6 @@ export const deleteTask = async (taskId: string, userId: string) => {
   await prisma.task.delete({
     where: { id: taskId }
   });
-
-  // activityService.logTaskDeleted(taskId);
-  // Actually, Prisma onDelete Cascade handles ActivityLog deletion.
-  // We can't log task deleted if the activity logs require the task to exist.
-  // The instructions say "Prisma onDelete: Cascade handles activity logs, Create activity log entry with action: deleted".
-  // Since we delete the task, the activity logs attached to it will also be deleted. Let's just return.
   
   return true;
 };

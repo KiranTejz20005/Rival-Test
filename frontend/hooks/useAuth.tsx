@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import api from '../lib/api';
 import { User } from '../types';
@@ -23,10 +25,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const checkAuth = async () => {
       const token = localStorage.getItem('accessToken');
       if (token) {
-        // Here we could add a check to the backend like `/api/auth/me`
-        // For simplicity and to save API calls, we'll assume valid token if present.
-        // The api interceptor will log us out if it's invalid
-        setUser({ id: 'dummy', email: 'user@example.com' }); 
+        try {
+          const { data } = await api.get('/api/auth/me');
+          setUser(data.data.user);
+        } catch (err) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
+        }
       }
       setLoading(false);
     };

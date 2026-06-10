@@ -23,11 +23,11 @@ export const signup = async (email: string, password: string) => {
     }
   });
 
-  const accessToken = generateAccessToken(user.id, user.email);
-  const refreshToken = generateRefreshToken(user.id, user.email);
+  const accessToken = generateAccessToken(user.id, user.email, user.role);
+  const refreshToken = generateRefreshToken(user.id, user.email, user.role);
 
   return {
-    user: { id: user.id, email: user.email },
+    user: { id: user.id, email: user.email, role: user.role },
     accessToken,
     refreshToken
   };
@@ -44,12 +44,23 @@ export const login = async (email: string, password: string) => {
     throw { status: 401, message: 'Invalid credentials' };
   }
 
-  const accessToken = generateAccessToken(user.id, user.email);
-  const refreshToken = generateRefreshToken(user.id, user.email);
+  const accessToken = generateAccessToken(user.id, user.email, user.role);
+  const refreshToken = generateRefreshToken(user.id, user.email, user.role);
 
   return {
-    user: { id: user.id, email: user.email },
+    user: { id: user.id, email: user.email, role: user.role },
     accessToken,
     refreshToken
   };
+};
+
+export const getUserById = async (id: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true, email: true, role: true, createdAt: true }
+  });
+  if (!user) {
+    throw { status: 404, message: 'User not found' };
+  }
+  return user;
 };

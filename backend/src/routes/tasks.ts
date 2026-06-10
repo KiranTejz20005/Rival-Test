@@ -12,6 +12,7 @@ router.use(requireAuth);
 router.post('/', validate(taskCreateSchema), tasksController.createTask);
 router.get('/', tasksController.getTasks);
 router.get('/:id', tasksController.getTask);
+router.get('/:id/activity', tasksController.getTaskActivity);
 router.patch('/:id', validate(taskUpdateSchema), tasksController.updateTask);
 router.delete('/:id', tasksController.deleteTask);
 

@@ -6,8 +6,7 @@ export const logTaskCreated = async (taskId: string) => {
   await prisma.activityLog.create({
     data: {
       taskId,
-      action: 'created',
-      changes: null
+      action: 'created'
     }
   });
 };
@@ -26,8 +25,27 @@ export const logTaskDeleted = async (taskId: string) => {
   await prisma.activityLog.create({
     data: {
       taskId,
-      action: 'deleted',
-      changes: null
+      action: 'deleted'
     }
+  });
+};
+
+export const getTaskActivity = async (taskId: string, userId: string, role: string) => {
+  const taskWhere: any = { id: taskId };
+  if (role !== 'ADMIN') {
+    taskWhere.userId = userId;
+  }
+  
+  const task = await prisma.task.findFirst({
+    where: taskWhere
+  });
+
+  if (!task) {
+    throw { status: 404, message: 'Task not found or not owned by user' };
+  }
+
+  return prisma.activityLog.findMany({
+    where: { taskId },
+    orderBy: { timestamp: 'desc' }
   });
 };

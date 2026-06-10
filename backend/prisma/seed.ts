@@ -28,6 +28,17 @@ async function main() {
     },
   });
 
+  // Admin User
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      email: 'admin@example.com',
+      passwordHash,
+      role: 'ADMIN',
+    },
+  });
+
   console.log('Users created.');
 
   // Delete all existing tasks
@@ -51,7 +62,6 @@ async function main() {
       data: {
         taskId: task.id,
         action: 'created',
-        changes: null,
       },
     });
   }
@@ -73,7 +83,6 @@ async function main() {
       data: {
         taskId: task.id,
         action: 'created',
-        changes: null,
       },
     });
   }

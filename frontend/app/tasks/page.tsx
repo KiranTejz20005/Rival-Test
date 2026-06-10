@@ -11,7 +11,8 @@ import TaskFilters from '../../components/TaskFilters';
 import SearchBar from '../../components/SearchBar';
 import Pagination from '../../components/Pagination';
 import TaskForm from '../../components/TaskForm';
-import { LogOut, Plus } from 'lucide-react';
+import TaskHistoryModal from '../../components/TaskHistoryModal';
+import { LogOut, Plus, Sun, Moon } from 'lucide-react';
 import { Task, CreateTaskRequest } from '../../types';
 
 export default function TasksPage() {
@@ -23,17 +24,48 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [allUsers, setAllUsers] = useState(false);
   const pageSize = 20;
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const [historyTask, setHistoryTask] = useState<Task | undefined>(undefined);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const isDark = localStorage.getItem('theme') === 'dark' || 
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setIsDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const nextDark = !isDarkMode;
+    setIsDarkMode(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   const { tasks, total, isLoading: tasksLoading, error: tasksError, refetch } = useTasks({
     status: statusFilter,
     priority: priorityFilter,
     search,
     page,
-    pageSize
+    pageSize,
+    sortBy,
+    sortOrder,
+    allUsers
   });
 
   const { delete: deleteTask } = useDeleteTask();
@@ -94,15 +126,33 @@ export default function TasksPage() {
   if (authLoading || !isAuthenticated) return <LoadingSpinner fullScreen />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <header className="bg-white dark:bg-gray-900 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">My Tasks</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Tasks</h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{user?.email}</span>
+            {user?.role === 'ADMIN' && (
+              <label className="flex items-center gap-2 cursor-pointer bg-amber-50 border border-amber-200 text-amber-800 text-xs px-3 py-1.5 rounded-full font-semibold dark:bg-amber-950/20 dark:border-amber-900/40 dark:text-amber-300">
+                <input 
+                  type="checkbox" 
+                  checked={allUsers} 
+                  onChange={(e) => { setAllUsers(e.target.checked); setPage(1); }} 
+                  className="rounded text-amber-600 focus:ring-amber-500 border-amber-300 dark:border-amber-700"
+                />
+                Admin: Show All Users' Tasks
+              </label>
+            )}
+            <button
+              onClick={toggleDarkMode}
+              className="p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+              title="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <span className="text-sm text-gray-650 dark:text-gray-405">{user?.email}</span>
             <button
               onClick={handleLogout}
-              className="flex items-center text-gray-600 hover:text-gray-900"
+              className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
             >
               <LogOut className="w-5 h-5 mr-1" />
               Logout
@@ -118,8 +168,12 @@ export default function TasksPage() {
             <TaskFilters 
               statusFilter={statusFilter} 
               priorityFilter={priorityFilter} 
+              sortBy={sortBy}
+              sortOrder={sortOrder}
               onStatusChange={(val) => { setStatusFilter(val); setPage(1); }} 
               onPriorityChange={(val) => { setPriorityFilter(val); setPage(1); }} 
+              onSortByChange={(val) => { setSortBy(val); setPage(1); }}
+              onSortOrderChange={(val) => { setSortOrder(val); setPage(1); }}
             />
           </div>
           <button 
@@ -138,6 +192,7 @@ export default function TasksPage() {
           onEdit={(task) => { setEditingTask(task); setIsFormOpen(true); }} 
           onDelete={handleDelete} 
           onToggleStatus={handleToggleStatus} 
+          onViewHistory={(task) => setHistoryTask(task)}
           onRetry={refetch}
         />
 
@@ -154,6 +209,14 @@ export default function TasksPage() {
           initialData={editingTask} 
           onSubmit={handleFormSubmit} 
           onClose={() => { setIsFormOpen(false); setEditingTask(undefined); }} 
+        />
+      )}
+
+      {historyTask && (
+        <TaskHistoryModal
+          taskId={historyTask.id}
+          taskTitle={historyTask.title}
+          onClose={() => setHistoryTask(undefined)}
         />
       )}
     </div>

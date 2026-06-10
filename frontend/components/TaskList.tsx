@@ -9,17 +9,27 @@ interface TaskListProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (task: Task) => void;
+  onViewHistory: (task: Task) => void;
   onRetry: () => void;
 }
 
-export default function TaskList({ tasks, isLoading, error, onEdit, onDelete, onToggleStatus, onRetry }: TaskListProps) {
+export default function TaskList({ 
+  tasks, 
+  isLoading, 
+  error, 
+  onEdit, 
+  onDelete, 
+  onToggleStatus, 
+  onViewHistory,
+  onRetry 
+}: TaskListProps) {
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
   if (error) {
     return (
-      <div className="text-center py-12 bg-white rounded-lg shadow">
+      <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-800">
         <p className="text-red-500 mb-4">{error}</p>
         <button onClick={onRetry} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
           Retry
@@ -30,8 +40,8 @@ export default function TaskList({ tasks, isLoading, error, onEdit, onDelete, on
 
   if (tasks.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-lg shadow">
-        <p className="text-gray-500">No tasks found. Create one to get started.</p>
+      <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-800">
+        <p className="text-gray-500 dark:text-gray-400">No tasks found. Create one to get started.</p>
       </div>
     );
   }
@@ -45,6 +55,7 @@ export default function TaskList({ tasks, isLoading, error, onEdit, onDelete, on
           onEdit={onEdit} 
           onDelete={onDelete} 
           onToggleStatus={onToggleStatus} 
+          onViewHistory={onViewHistory}
         />
       ))}
     </div>

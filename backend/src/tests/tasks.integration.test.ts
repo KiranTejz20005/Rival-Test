@@ -32,6 +32,9 @@ describe('Tasks Endpoints', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ title: 'Test task', priority: 'HIGH' });
       
+      if (res.status !== 201) {
+        console.log('Task creation failed response body:', res.body);
+      }
       expect(res.status).toBe(201);
       expect(res.body.data.title).toBe('Test task');
     });

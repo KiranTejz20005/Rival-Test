@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   email: string;
+  role?: string;
 }
 
 export interface Task {
@@ -44,4 +45,5 @@ export interface TaskFilters {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: string;
+  allUsers?: boolean;
 }

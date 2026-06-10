@@ -4,7 +4,7 @@ import { verifyAccessToken } from '../utils/jwt';
 declare global {
   namespace Express {
     interface Request {
-      user?: { id: string; email: string };
+      user?: { id: string; email: string; role: string };
     }
   }
 }
@@ -19,7 +19,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   try {
     const decoded = verifyAccessToken(token);
-    req.user = { id: decoded.sub, email: decoded.email };
+    req.user = { id: decoded.sub, email: decoded.email, role: decoded.role };
     next();
   } catch (error) {
     return res.status(401).json({ error: 'Invalid or expired token', status: 401, timestamp: new Date().toISOString() });

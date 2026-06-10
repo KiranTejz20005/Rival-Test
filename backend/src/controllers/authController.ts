@@ -31,7 +31,7 @@ export const refresh = async (req: Request, res: Response) => {
 
   try {
     const decoded = verifyRefreshToken(refreshToken);
-    const newAccessToken = generateAccessToken(decoded.sub, decoded.email);
+    const newAccessToken = generateAccessToken(decoded.sub, decoded.email, decoded.role);
     
     res.status(200).json({
       data: { accessToken: newAccessToken },
@@ -41,4 +41,14 @@ export const refresh = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(401).json({ error: 'Invalid or expired refresh token', status: 401, timestamp: new Date().toISOString() });
   }
+};
+
+export const getMe = async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const user = await authService.getUserById(userId);
+  res.status(200).json({
+    data: { user },
+    status: 'success',
+    timestamp: new Date().toISOString()
+  });
 };

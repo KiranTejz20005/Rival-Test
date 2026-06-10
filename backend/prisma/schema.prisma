@@ -11,6 +11,7 @@ model User {
   id           String        @id @default(uuid())
   email        String        @unique
   passwordHash String
+  role         Role          @default(USER)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   tasks        Task[]
@@ -64,3 +65,9 @@ enum Priority {
   MEDIUM
   HIGH
 }
+
+enum Role {
+  USER
+  ADMIN
+}
+

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as tasksService from '../services/tasksService';
+import * as activityService from '../services/activityService';
 import { Status, Priority } from '@prisma/client';
 
 export const createTask = async (req: Request, res: Response) => {
@@ -24,16 +25,18 @@ export const createTask = async (req: Request, res: Response) => {
 
 export const getTasks = async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  const { status, priority, search, sortBy, sortOrder, page, pageSize } = req.query;
+  const role = req.user!.role;
+  const { status, priority, search, sortBy, sortOrder, page, pageSize, allUsers } = req.query;
   
-  const result = await tasksService.getTasks(userId, {
+  const result = await tasksService.getTasks(userId, role, {
     status: status as Status,
     priority: priority as Priority,
     search: search as string,
     sortBy: sortBy as string,
     sortOrder: sortOrder as 'asc' | 'desc',
     page: page ? Number(page) : undefined,
-    pageSize: pageSize ? Number(pageSize) : undefined
+    pageSize: pageSize ? Number(pageSize) : undefined,
+    allUsers: allUsers === 'true'
   });
   
   res.status(200).json({
@@ -42,12 +45,13 @@ export const getTasks = async (req: Request, res: Response) => {
     timestamp: new Date().toISOString()
   });
 };
-
+ 
 export const getTask = async (req: Request, res: Response) => {
   const userId = req.user!.id;
+  const role = req.user!.role;
   const taskId = req.params.id;
   
-  const task = await tasksService.getTask(taskId, userId);
+  const task = await tasksService.getTask(taskId, userId, role);
   
   res.status(200).json({
     data: task,
@@ -55,15 +59,16 @@ export const getTask = async (req: Request, res: Response) => {
     timestamp: new Date().toISOString()
   });
 };
-
+ 
 export const updateTask = async (req: Request, res: Response) => {
   const userId = req.user!.id;
+  const role = req.user!.role;
   const taskId = req.params.id;
   
   const updates = { ...req.body };
   if (updates.dueDate) updates.dueDate = new Date(updates.dueDate);
   
-  const task = await tasksService.updateTask(taskId, userId, updates);
+  const task = await tasksService.updateTask(taskId, userId, role, updates);
   
   res.status(200).json({
     data: task,
@@ -71,15 +76,29 @@ export const updateTask = async (req: Request, res: Response) => {
     timestamp: new Date().toISOString()
   });
 };
-
+ 
 export const deleteTask = async (req: Request, res: Response) => {
   const userId = req.user!.id;
+  const role = req.user!.role;
   const taskId = req.params.id;
   
-  await tasksService.deleteTask(taskId, userId);
+  await tasksService.deleteTask(taskId, userId, role);
   
   res.status(200).json({
     message: 'task deleted',
+    status: 'success',
+    timestamp: new Date().toISOString()
+  });
+};
+
+export const getTaskActivity = async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const role = req.user!.role;
+  const taskId = req.params.id;
+
+  const logs = await activityService.getTaskActivity(taskId, userId, role);
+  res.status(200).json({
+    data: logs,
     status: 'success',
     timestamp: new Date().toISOString()
   });
