@@ -141,23 +141,23 @@ export default function TasksPage() {
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
       <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
               <span className="text-white dark:text-black font-black text-lg">R</span>
             </div>
             <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">Rival Tasks</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
             {user?.role === 'ADMIN' && (
-              <label className="flex items-center gap-2 cursor-pointer bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-3 py-1.5 rounded-lg font-medium">
+              <label className="flex items-center gap-2 cursor-pointer bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-2.5 py-1.5 rounded-lg font-medium whitespace-nowrap">
                 <input 
                   type="checkbox" 
                   checked={allUsers} 
                   onChange={(e) => { setAllUsers(e.target.checked); setPage(1); }} 
                   className="rounded text-neutral-900 focus:ring-neutral-500 border-neutral-300 dark:border-neutral-700 bg-transparent"
                 />
-                Admin Mode (All Tasks)
+                Admin Mode
               </label>
             )}
             <button
@@ -167,11 +167,11 @@ export default function TasksPage() {
             >
               {isDarkMode ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
             </button>
-            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-850" />
-            <span className="text-sm text-neutral-550 dark:text-neutral-400 font-medium hidden md:inline">{user?.email}</span>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-850 hidden sm:block" />
+            <span className="text-sm text-neutral-550 dark:text-neutral-400 font-medium hidden md:inline truncate max-w-[180px]">{user?.email}</span>
             <button
               onClick={handleLogout}
-              className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 px-3 py-1.5 rounded-lg transition gap-1.5"
+              className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 px-2.5 py-1.5 rounded-lg transition gap-1.5"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -180,25 +180,27 @@ export default function TasksPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Search, Filter & Layout bar */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
             <div className="flex-1 flex flex-col md:flex-row gap-3">
               <SearchBar onSearch={(val) => { setSearch(val); setPage(1); }} />
-              <TaskFilters 
-                statusFilter={statusFilter} 
-                priorityFilter={priorityFilter} 
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onStatusChange={(val) => { setStatusFilter(val); setPage(1); }} 
-                onPriorityChange={(val) => { setPriorityFilter(val); setPage(1); }} 
-                onSortByChange={(val) => { setSortBy(val); setPage(1); }}
-                onSortOrderChange={(val) => { setSortOrder(val); setPage(1); }}
-              />
+              <div className="overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                <TaskFilters 
+                  statusFilter={statusFilter} 
+                  priorityFilter={priorityFilter} 
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onStatusChange={(val) => { setStatusFilter(val); setPage(1); }} 
+                  onPriorityChange={(val) => { setPriorityFilter(val); setPage(1); }} 
+                  onSortByChange={(val) => { setSortBy(val); setPage(1); }}
+                  onSortOrderChange={(val) => { setSortOrder(val); setPage(1); }}
+                />
+              </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between sm:justify-end gap-3">
               {/* View Toggle */}
               <div className="flex items-center border border-neutral-200 dark:border-neutral-800 rounded-lg p-0.5 bg-white dark:bg-neutral-900 shadow-sm">
                 <button
@@ -225,7 +227,7 @@ export default function TasksPage() {
 
               <button 
                 onClick={() => { setEditingTask(undefined); setIsFormOpen(true); }}
-                className="flex items-center bg-black hover:bg-neutral-850 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm gap-1.5"
+                className="flex items-center bg-black hover:bg-neutral-850 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm gap-1.5 flex-1 sm:flex-initial justify-center"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Task</span>
