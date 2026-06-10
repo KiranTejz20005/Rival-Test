@@ -12,8 +12,9 @@ import SearchBar from '../../components/SearchBar';
 import Pagination from '../../components/Pagination';
 import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
-import { LogOut, Plus, Sun, Moon } from 'lucide-react';
+import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Task, CreateTaskRequest } from '../../types';
+import clsx from 'clsx';
 
 export default function TasksPage() {
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -27,6 +28,7 @@ export default function TasksPage() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [allUsers, setAllUsers] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const pageSize = 20;
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -43,6 +45,12 @@ export default function TasksPage() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // Load preferred view mode
+    const savedView = localStorage.getItem('viewMode') as 'grid' | 'table';
+    if (savedView === 'grid' || savedView === 'table') {
+      setViewMode(savedView);
+    }
   }, []);
 
   const toggleDarkMode = () => {
@@ -55,6 +63,11 @@ export default function TasksPage() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
+  };
+
+  const handleViewModeChange = (mode: 'grid' | 'table') => {
+    setViewMode(mode);
+    localStorage.setItem('viewMode', mode);
   };
 
   const { tasks, total, isLoading: tasksLoading, error: tasksError, refetch } = useTasks({
@@ -126,75 +139,250 @@ export default function TasksPage() {
   if (authLoading || !isAuthenticated) return <LoadingSpinner fullScreen />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      <header className="bg-white dark:bg-gray-900 shadow">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+      <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Tasks</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
+              <span className="text-white dark:text-black font-black text-lg">R</span>
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">Rival Tasks</h1>
+          </div>
           <div className="flex items-center gap-4">
             {user?.role === 'ADMIN' && (
-              <label className="flex items-center gap-2 cursor-pointer bg-amber-50 border border-amber-200 text-amber-800 text-xs px-3 py-1.5 rounded-full font-semibold dark:bg-amber-950/20 dark:border-amber-900/40 dark:text-amber-300">
+              <label className="flex items-center gap-2 cursor-pointer bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-3 py-1.5 rounded-lg font-medium">
                 <input 
                   type="checkbox" 
                   checked={allUsers} 
                   onChange={(e) => { setAllUsers(e.target.checked); setPage(1); }} 
-                  className="rounded text-amber-600 focus:ring-amber-500 border-amber-300 dark:border-amber-700"
+                  className="rounded text-neutral-900 focus:ring-neutral-500 border-neutral-300 dark:border-neutral-700 bg-transparent"
                 />
-                Admin: Show All Users' Tasks
+                Admin Mode (All Tasks)
               </label>
             )}
             <button
               onClick={toggleDarkMode}
-              className="p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+              className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
               title="Toggle Dark Mode"
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDarkMode ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
             </button>
-            <span className="text-sm text-gray-650 dark:text-gray-405">{user?.email}</span>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-850" />
+            <span className="text-sm text-neutral-550 dark:text-neutral-400 font-medium hidden md:inline">{user?.email}</span>
             <button
               onClick={handleLogout}
-              className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 px-3 py-1.5 rounded-lg transition gap-1.5"
             >
-              <LogOut className="w-5 h-5 mr-1" />
-              Logout
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="flex-1 w-full flex flex-col sm:flex-row gap-4">
-            <SearchBar onSearch={(val) => { setSearch(val); setPage(1); }} />
-            <TaskFilters 
-              statusFilter={statusFilter} 
-              priorityFilter={priorityFilter} 
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              onStatusChange={(val) => { setStatusFilter(val); setPage(1); }} 
-              onPriorityChange={(val) => { setPriorityFilter(val); setPage(1); }} 
-              onSortByChange={(val) => { setSortBy(val); setPage(1); }}
-              onSortOrderChange={(val) => { setSortOrder(val); setPage(1); }}
-            />
+        {/* Search, Filter & Layout bar */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
+            <div className="flex-1 flex flex-col md:flex-row gap-3">
+              <SearchBar onSearch={(val) => { setSearch(val); setPage(1); }} />
+              <TaskFilters 
+                statusFilter={statusFilter} 
+                priorityFilter={priorityFilter} 
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onStatusChange={(val) => { setStatusFilter(val); setPage(1); }} 
+                onPriorityChange={(val) => { setPriorityFilter(val); setPage(1); }} 
+                onSortByChange={(val) => { setSortBy(val); setPage(1); }}
+                onSortOrderChange={(val) => { setSortOrder(val); setPage(1); }}
+              />
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {/* View Toggle */}
+              <div className="flex items-center border border-neutral-200 dark:border-neutral-800 rounded-lg p-0.5 bg-white dark:bg-neutral-900 shadow-sm">
+                <button
+                  onClick={() => handleViewModeChange('grid')}
+                  className={clsx("p-1.5 rounded-md transition", {
+                    "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100": viewMode === 'grid',
+                    "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300": viewMode !== 'grid'
+                  })}
+                  title="Card Grid View"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleViewModeChange('table')}
+                  className={clsx("p-1.5 rounded-md transition", {
+                    "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100": viewMode === 'table',
+                    "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300": viewMode !== 'table'
+                  })}
+                  title="Table List View"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
+
+              <button 
+                onClick={() => { setEditingTask(undefined); setIsFormOpen(true); }}
+                className="flex items-center bg-black hover:bg-neutral-850 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Task</span>
+              </button>
+            </div>
           </div>
-          <button 
-            onClick={() => { setEditingTask(undefined); setIsFormOpen(true); }}
-            className="flex items-center bg-black hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black px-4 py-2 rounded-lg font-semibold transition w-full sm:w-auto justify-center"
-          >
-            <Plus className="w-5 h-5 mr-1" />
-            New Task
-          </button>
         </div>
 
-        <TaskList 
-          tasks={tasks} 
-          isLoading={tasksLoading} 
-          error={tasksError} 
-          onEdit={(task) => { setEditingTask(task); setIsFormOpen(true); }} 
-          onDelete={handleDelete} 
-          onToggleStatus={handleToggleStatus} 
-          onViewHistory={(task) => setHistoryTask(task)}
-          onRetry={refetch}
-        />
+        {/* Content list or table */}
+        {viewMode === 'grid' ? (
+          <TaskList 
+            tasks={tasks} 
+            isLoading={tasksLoading} 
+            error={tasksError} 
+            onEdit={(task) => { setEditingTask(task); setIsFormOpen(true); }} 
+            onDelete={handleDelete} 
+            onToggleStatus={handleToggleStatus} 
+            onViewHistory={(task) => setHistoryTask(task)}
+            onRetry={refetch}
+          />
+        ) : (
+          <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 overflow-hidden shadow-sm">
+            {tasksLoading ? (
+              <div className="py-24">
+                <LoadingSpinner />
+              </div>
+            ) : tasksError ? (
+              <div className="text-center py-12">
+                <p className="text-red-500 mb-4">{tasksError}</p>
+                <button onClick={refetch} className="bg-neutral-900 text-white dark:bg-white dark:text-black px-4 py-2 rounded-md hover:opacity-90">
+                  Retry
+                </button>
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-neutral-500 dark:text-neutral-400 text-sm">No tasks found. Create one to get started.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-neutral-200 dark:border-neutral-850 bg-neutral-50 dark:bg-neutral-900/50 text-neutral-500 dark:text-neutral-400 font-medium">
+                      <th className="py-3.5 px-6 font-semibold">Title</th>
+                      <th className="py-3.5 px-4 font-semibold">Status</th>
+                      <th className="py-3.5 px-4 font-semibold">Priority</th>
+                      <th className="py-3.5 px-4 font-semibold">Due Date</th>
+                      {allUsers && <th className="py-3.5 px-4 font-semibold">Owner</th>}
+                      <th className="py-3.5 px-6 text-right font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100 dark:divide-neutral-850">
+                    {tasks.map(task => {
+                      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'DONE';
+                      const dueSoon = task.dueDate && new Date(task.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000 && task.status !== 'DONE';
+
+                      return (
+                        <tr key={task.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-850/20 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex flex-col max-w-[300px] md:max-w-md">
+                              <span className={clsx("font-medium text-neutral-900 dark:text-neutral-100 truncate", {
+                                "line-through text-neutral-400 dark:text-neutral-500": task.status === 'DONE'
+                              })}>
+                                {task.title}
+                              </span>
+                              {task.description && (
+                                <span className="text-neutral-500 dark:text-neutral-400 text-xs mt-0.5 truncate">
+                                  {task.description}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={clsx("inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", {
+                              "bg-neutral-100 text-neutral-855 dark:bg-neutral-800 dark:text-neutral-300": task.status === 'TODO',
+                              "bg-orange-50 text-orange-700 dark:bg-orange-950/20 dark:text-orange-400": task.status === 'IN_PROGRESS',
+                              "bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400": task.status === 'DONE',
+                            })}>
+                              <span className={clsx("w-1 h-1 rounded-full", {
+                                "bg-neutral-600 dark:bg-neutral-400": task.status === 'TODO',
+                                "bg-orange-500": task.status === 'IN_PROGRESS',
+                                "bg-green-500": task.status === 'DONE',
+                              })} />
+                              {task.status.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={clsx("inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider", {
+                              "bg-neutral-50 text-neutral-600 dark:bg-neutral-900/50 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800": task.priority === 'LOW',
+                              "bg-yellow-50 text-yellow-800 dark:bg-yellow-950/20 dark:text-yellow-400": task.priority === 'MEDIUM',
+                              "bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-400": task.priority === 'HIGH',
+                            })}>
+                              {task.priority === 'HIGH' && <AlertCircle className="w-2.5 h-2.5" />}
+                              {task.priority}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            {task.dueDate ? (
+                              <span className={clsx("text-xs font-medium", {
+                                "text-red-600 dark:text-red-400 font-semibold": isOverdue,
+                                "text-orange-600 dark:text-orange-400": !isOverdue && dueSoon,
+                                "text-neutral-500 dark:text-neutral-400": !isOverdue && !dueSoon,
+                              })}>
+                                {isOverdue ? 'Overdue' : new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            ) : (
+                              <span className="text-neutral-400 dark:text-neutral-600 text-xs">-</span>
+                            )}
+                          </td>
+                          {allUsers && (
+                            <td className="py-4 px-4 text-xs text-neutral-500 dark:text-neutral-400 max-w-[120px] truncate">
+                              {task.user?.email || 'Unknown'}
+                            </td>
+                          )}
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button 
+                                onClick={() => handleToggleStatus(task)} 
+                                className={clsx("p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition", { 
+                                  "text-green-650": task.status === 'DONE', 
+                                  "text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100": task.status !== 'DONE' 
+                                })}
+                                title={task.status === 'DONE' ? 'Mark as Todo' : 'Mark as Done'}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => setHistoryTask(task)} 
+                                className="p-1.5 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" 
+                                title="View History"
+                              >
+                                <Calendar className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => { setEditingTask(task); setIsFormOpen(true); }} 
+                                className="p-1.5 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" 
+                                title="Edit"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(task.id)} 
+                                className="p-1.5 text-neutral-400 hover:text-red-650 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" 
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         <Pagination 
           page={page} 
@@ -222,3 +410,4 @@ export default function TasksPage() {
     </div>
   );
 }
+

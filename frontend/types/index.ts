@@ -14,6 +14,9 @@ export interface Task {
   dueDate?: string;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    email: string;
+  };
 }
 
 export interface CreateTaskRequest {

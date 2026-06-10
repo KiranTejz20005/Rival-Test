@@ -17,12 +17,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
 
   return (
     <div className="relative flex-1">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-5 w-5 text-gray-400" />
+      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+        <Search className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
       </div>
       <input
         type="text"
-        className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-200 focus:outline-none focus:placeholder-gray-450 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm"
+        className="block w-full pl-10 pr-10 py-2 border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 placeholder-neutral-400 dark:placeholder-neutral-500 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:ring-1 focus:ring-neutral-950 dark:focus:ring-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700 transition duration-200 shadow-sm"
         placeholder="Search tasks by title..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -30,11 +30,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
       {value && (
         <button
           onClick={() => setValue('')}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center"
+          className="absolute inset-y-0 right-0 pr-3.5 flex items-center"
         >
-          <X className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+          <X className="h-4 w-4 text-neutral-450 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors" />
         </button>
       )}
     </div>
   );
 }
+
