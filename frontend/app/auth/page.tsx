@@ -57,7 +57,6 @@ export default function AuthPage() {
   if (isLoading || isAuthenticated) return null;
 
   return (
-  return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
       <div className="max-w-md w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-2xl p-8">
         <div className="text-center mb-8">
