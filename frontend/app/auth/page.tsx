@@ -57,86 +57,99 @@ export default function AuthPage() {
   if (isLoading || isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8">
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
+      <div className="max-w-md w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-2xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{isLogin ? 'Welcome Back' : 'Create Account'}</h1>
-          <p className="text-gray-500 mt-2">{isLogin ? 'Enter your credentials to access your tasks' : 'Sign up to start managing your tasks'}</p>
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50">{isLogin ? 'Sign In' : 'Create Account'}</h1>
+          <p className="text-neutral-500 dark:text-neutral-400 mt-2 text-sm">
+            {isLogin ? 'Enter your credentials to access your tasks' : 'Sign up to start managing your tasks'}
+          </p>
         </div>
 
         {isLogin ? (
-          <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+          <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Email</label>
               <input
                 {...loginForm.register('email')}
                 type="email"
-                className={clsx("mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border", {
-                  "border-red-500": loginForm.formState.errors.email
-                })}
+                className={clsx(
+                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                  { "border-red-500 dark:border-red-500": loginForm.formState.errors.email }
+                )}
+                placeholder="you@example.com"
               />
-              {loginForm.formState.errors.email && <p className="text-red-500 text-sm mt-1">{loginForm.formState.errors.email.message}</p>}
+              {loginForm.formState.errors.email && <p className="text-red-500 text-xs mt-1">{loginForm.formState.errors.email.message}</p>}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Password</label>
               <input
                 {...loginForm.register('password')}
                 type="password"
-                className={clsx("mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border", {
-                  "border-red-500": loginForm.formState.errors.password
-                })}
+                className={clsx(
+                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                  { "border-red-500 dark:border-red-500": loginForm.formState.errors.password }
+                )}
+                placeholder="••••••••"
               />
-              {loginForm.formState.errors.password && <p className="text-red-500 text-sm mt-1">{loginForm.formState.errors.password.message}</p>}
+              {loginForm.formState.errors.password && <p className="text-red-500 text-xs mt-1">{loginForm.formState.errors.password.message}</p>}
             </div>
             <button
               type="submit"
               disabled={loginForm.formState.isSubmitting}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
             >
-              {loginForm.formState.isSubmitting ? 'Logging in...' : 'Login'}
+              {loginForm.formState.isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         ) : (
-          <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+          <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Email</label>
               <input
                 {...signupForm.register('email')}
                 type="email"
-                className={clsx("mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border", {
-                  "border-red-500": signupForm.formState.errors.email
-                })}
+                className={clsx(
+                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                  { "border-red-500 dark:border-red-500": signupForm.formState.errors.email }
+                )}
+                placeholder="you@example.com"
               />
-              {signupForm.formState.errors.email && <p className="text-red-500 text-sm mt-1">{signupForm.formState.errors.email.message}</p>}
+              {signupForm.formState.errors.email && <p className="text-red-500 text-xs mt-1">{signupForm.formState.errors.email.message}</p>}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Password</label>
               <input
                 {...signupForm.register('password')}
                 type="password"
-                className={clsx("mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border", {
-                  "border-red-500": signupForm.formState.errors.password
-                })}
+                className={clsx(
+                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                  { "border-red-500 dark:border-red-500": signupForm.formState.errors.password }
+                )}
+                placeholder="••••••••"
               />
-              {signupForm.formState.errors.password && <p className="text-red-500 text-sm mt-1">{signupForm.formState.errors.password.message}</p>}
+              {signupForm.formState.errors.password && <p className="text-red-500 text-xs mt-1">{signupForm.formState.errors.password.message}</p>}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Confirm Password</label>
               <input
                 {...signupForm.register('confirmPassword')}
                 type="password"
-                className={clsx("mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border", {
-                  "border-red-500": signupForm.formState.errors.confirmPassword
-                })}
+                className={clsx(
+                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                  { "border-red-500 dark:border-red-500": signupForm.formState.errors.confirmPassword }
+                )}
+                placeholder="••••••••"
               />
-              {signupForm.formState.errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{signupForm.formState.errors.confirmPassword.message}</p>}
+              {signupForm.formState.errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{signupForm.formState.errors.confirmPassword.message}</p>}
             </div>
             <button
               type="submit"
               disabled={signupForm.formState.isSubmitting}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
             >
-              {signupForm.formState.isSubmitting ? 'Signing up...' : 'Sign up'}
+              {signupForm.formState.isSubmitting ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
         )}
@@ -144,9 +157,9 @@ export default function AuthPage() {
         <div className="mt-6 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+            className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold underline underline-offset-4"
           >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
+            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
           </button>
         </div>
       </div>

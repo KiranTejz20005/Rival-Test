@@ -178,7 +178,7 @@ export default function TasksPage() {
           </div>
           <button 
             onClick={() => { setEditingTask(undefined); setIsFormOpen(true); }}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition w-full sm:w-auto justify-center"
+            className="flex items-center bg-black hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black px-4 py-2 rounded-lg font-semibold transition w-full sm:w-auto justify-center"
           >
             <Plus className="w-5 h-5 mr-1" />
             New Task
