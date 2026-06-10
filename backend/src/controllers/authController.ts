@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
-import { verifyRefreshToken, generateAccessToken } from '../utils/jwt';
 
 export const signup = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -24,23 +23,32 @@ export const login = async (req: Request, res: Response) => {
 
 export const refresh = async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
-  
+
   if (!refreshToken) {
     return res.status(401).json({ error: 'Refresh token required', status: 401, timestamp: new Date().toISOString() });
   }
 
   try {
-    const decoded = verifyRefreshToken(refreshToken);
-    const newAccessToken = generateAccessToken(decoded.sub, decoded.email, decoded.role);
-    
+    const result = await authService.refresh(refreshToken);
     res.status(200).json({
-      data: { accessToken: newAccessToken },
+      data: result,
       status: 'success',
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired refresh token', status: 401, timestamp: new Date().toISOString() });
+  } catch (error: any) {
+    const status = error.status || 401;
+    res.status(status).json({ error: error.message || 'Invalid refresh token', status, timestamp: new Date().toISOString() });
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  await authService.logout(userId);
+  res.status(200).json({
+    message: 'Logged out successfully',
+    status: 'success',
+    timestamp: new Date().toISOString()
+  });
 };
 
 export const getMe = async (req: Request, res: Response) => {

@@ -3,7 +3,6 @@ import * as tasksController from '../controllers/tasksController';
 import { validate } from '../middleware/validation';
 import { taskCreateSchema, taskUpdateSchema } from '../utils/validators';
 import { requireAuth } from '../middleware/auth';
-import { canModifyTask } from '../middleware/authorize';
 
 const router = Router();
 

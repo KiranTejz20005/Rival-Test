@@ -8,14 +8,20 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  passwordHash String
-  role         Role          @default(USER)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  tasks        Task[]
+  id              String        @id @default(uuid())
+  email           String        @unique
+  passwordHash    String
+  role            Role          @default(USER)
+  isActive        Boolean       @default(true)
+  refreshTokenHash String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  tasks           Task[]
 
+  @@index([role])
+  @@index([isActive])
+  @@index([email])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -36,7 +42,11 @@ model Task {
   @@index([userId])
   @@index([status])
   @@index([priority])
+  @@index([createdAt])
   @@index([dueDate])
+  @@index([userId, status])
+  @@index([userId, priority])
+  @@index([userId, createdAt])
   @@map("tasks")
 }
 
@@ -50,7 +60,9 @@ model ActivityLog {
   task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@index([taskId])
+  @@index([action])
   @@index([timestamp])
+  @@index([taskId, timestamp])
   @@map("activity_logs")
 }
 
@@ -70,4 +82,3 @@ enum Role {
   USER
   ADMIN
 }
-

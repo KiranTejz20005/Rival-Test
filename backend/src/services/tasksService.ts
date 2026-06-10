@@ -159,9 +159,13 @@ export const deleteTask = async (taskId: string, userId: string, role: string) =
     throw { status: 404, message: 'Task not found or not owned by user' };
   }
 
+  const taskSnapshot = { title: task.title, status: task.status, priority: task.priority };
+
   await prisma.task.delete({
     where: { id: taskId }
   });
+
+  await activityService.logTaskDeleted(taskId, taskSnapshot);
   
   return true;
 };

@@ -21,11 +21,12 @@ export const logTaskUpdated = async (taskId: string, changes: any) => {
   });
 };
 
-export const logTaskDeleted = async (taskId: string) => {
+export const logTaskDeleted = async (taskId: string, metadata?: any) => {
   await prisma.activityLog.create({
     data: {
       taskId,
-      action: 'deleted'
+      action: 'deleted',
+      changes: metadata || null
     }
   });
 };
