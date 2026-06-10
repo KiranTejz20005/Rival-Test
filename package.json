@@ -1,0 +1,10 @@
+{
+  "name": "task-management-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "cd backend && npm run build",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "test": "cd backend && npm test"
+  }
+}
