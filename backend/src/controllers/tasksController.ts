@@ -35,7 +35,7 @@ export const createTask = async (req: Request, res: Response) => {
     status: status as Status,
     priority: priority as Priority,
     dueDate: dueDate ? new Date(dueDate) : undefined
-  });
+  }, authenticatedUserId);
   
   res.status(201).json({
     data: task,

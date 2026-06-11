@@ -205,7 +205,7 @@ export const createUsersBatch = async (usersData: { email: string; password?: st
     if (data.password && validatePasswordStrength(data.password)) {
       passwordHash = await hashPassword(data.password);
     } else {
-      passwordHash = await hashPassword('DefaultPass123!');
+      passwordHash = await hashPassword('Test@1234');
     }
 
     const role = (data.role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER') as Role;
@@ -262,6 +262,9 @@ export const getStats = async () => {
       include: {
         task: {
           select: { title: true }
+        },
+        user: {
+          select: { email: true }
         }
       }
     })
@@ -301,6 +304,9 @@ export const getActivityLogs = async (filters: {
       include: {
         task: {
           select: { title: true, userId: true }
+        },
+        user: {
+          select: { email: true }
         }
       }
     }),

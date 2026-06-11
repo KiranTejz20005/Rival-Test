@@ -2,29 +2,32 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const logTaskCreated = async (taskId: string) => {
+export const logTaskCreated = async (taskId: string, userId: string) => {
   await prisma.activityLog.create({
     data: {
       taskId,
+      userId,
       action: 'created'
     }
   });
 };
 
-export const logTaskUpdated = async (taskId: string, changes: any) => {
+export const logTaskUpdated = async (taskId: string, userId: string, changes: any) => {
   await prisma.activityLog.create({
     data: {
       taskId,
+      userId,
       action: 'updated',
       changes
     }
   });
 };
 
-export const logTaskDeleted = async (taskId: string, metadata?: any) => {
+export const logTaskDeleted = async (taskId: string, userId: string, metadata?: any) => {
   await prisma.activityLog.create({
     data: {
       taskId,
+      userId,
       action: 'deleted',
       changes: metadata || null
     }
@@ -47,6 +50,9 @@ export const getTaskActivity = async (taskId: string, userId: string, role: stri
 
   return prisma.activityLog.findMany({
     where: { taskId },
-    orderBy: { timestamp: 'desc' }
+    orderBy: { timestamp: 'desc' },
+    include: {
+      user: { select: { email: true } }
+    }
   });
 };

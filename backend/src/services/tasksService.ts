@@ -23,11 +23,12 @@ interface TaskFilters {
   pageSize?: number;
 }
 
-export const createTask = async (data: TaskCreateData) => {
+export const createTask = async (data: TaskCreateData, userId: string) => {
   const task = await prisma.task.create({
     data: {
       userId: data.userId || null,
       assignedRole: data.assignedRole || null,
+      createdById: userId,
       title: data.title,
       description: data.description || null,
       status: data.status || Status.TODO,
@@ -36,7 +37,7 @@ export const createTask = async (data: TaskCreateData) => {
     }
   });
 
-  await activityService.logTaskCreated(task.id);
+  await activityService.logTaskCreated(task.id, userId);
   return task;
 };
 
@@ -76,6 +77,11 @@ export const getTasks = async (userId: string, role: string, filters: TaskFilter
           select: {
             email: true
           }
+        },
+        createdBy: {
+          select: {
+            email: true
+          }
         }
       }
     }),
@@ -98,6 +104,11 @@ export const getTask = async (taskId: string, userId: string, role: string) => {
     where,
     include: {
       user: {
+        select: {
+          email: true
+        }
+      },
+      createdBy: {
         select: {
           email: true
         }
@@ -161,7 +172,7 @@ export const updateTask = async (taskId: string, userId: string, role: string, u
   });
 
   if (changes.length > 0) {
-    await activityService.logTaskUpdated(taskId, changes);
+    await activityService.logTaskUpdated(taskId, userId, changes);
   }
 
   return updatedTask;
@@ -186,7 +197,7 @@ export const deleteTask = async (taskId: string, userId: string, role: string) =
 
   const taskSnapshot = { title: task.title, status: task.status, priority: task.priority };
 
-  await activityService.logTaskDeleted(taskId, taskSnapshot);
+  await activityService.logTaskDeleted(taskId, userId, taskSnapshot);
 
   await prisma.task.delete({
     where: { id: taskId }
