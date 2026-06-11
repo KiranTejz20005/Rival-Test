@@ -22,7 +22,11 @@ export interface Task {
   updatedAt: string;
   userId?: string | null;
   assignedRole?: string | null;
+  createdById?: string | null;
   user?: {
+    email: string;
+  };
+  createdBy?: {
     email: string;
   };
 }
@@ -78,12 +82,16 @@ export interface AdminStats {
 export interface ActivityLog {
   id: string;
   taskId: string;
+  userId?: string;
   action: string;
   changes?: any;
   timestamp: string;
   task?: {
     title: string;
-    userId: string;
+    userId?: string;
+  };
+  user?: {
+    email: string;
   };
 }
 

@@ -153,12 +153,7 @@ export default function TasksPage() {
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
         <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
-              <span className="text-white dark:text-black font-black text-lg">R</span>
-            </div>
-            <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">Rival Tasks</h1>
-          </div>
+          <div className="flex-1"></div>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
             <button
               onClick={toggleDarkMode}
@@ -268,7 +263,7 @@ export default function TasksPage() {
                       <th className="py-3.5 px-4 font-semibold">Status</th>
                       <th className="py-3.5 px-4 font-semibold">Priority</th>
                       <th className="py-3.5 px-4 font-semibold">Due Date</th>
-                      {user?.role === 'ADMIN' && <th className="py-3.5 px-4 font-semibold">Owner</th>}
+                      {user?.role === 'ADMIN' && <th className="py-3.5 px-4 font-semibold">Creator</th>}
                       <th className="py-3.5 px-6 text-right font-semibold">Actions</th>
                     </tr>
                   </thead>
@@ -332,7 +327,7 @@ export default function TasksPage() {
                           </td>
                           {user?.role === 'ADMIN' && (
                             <td className="py-4 px-4 text-xs text-neutral-500 dark:text-neutral-400 max-w-[120px] truncate">
-                              {task.user?.email || 'Unknown'}
+                              {task.createdBy?.email || '-'}
                             </td>
                           )}
                           <td className="py-4 px-6 text-right">

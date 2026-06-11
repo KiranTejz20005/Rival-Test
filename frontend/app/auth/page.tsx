@@ -56,7 +56,16 @@ export default function AuthPage() {
     }
   };
 
-  if (isLoading || isAuthenticated) return null;
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-neutral-200 dark:border-neutral-800 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
+          <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Loading your workspace...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">

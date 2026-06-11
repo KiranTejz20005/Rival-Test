@@ -11,7 +11,8 @@ import Pagination from '../../../components/Pagination';
 import AdminSidebar from '../../../components/AdminSidebar';
 import CreateUserModal from '../../../components/CreateUserModal';
 import ImportCsvModal from '../../../components/ImportCsvModal';
-import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo, Plus, Upload } from 'lucide-react';
+import ProfileDropdown from '../../../components/ProfileDropdown';
+import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo, Plus, Upload, Sun, Moon } from 'lucide-react';
 import clsx from 'clsx';
 import { Task, User } from '../../../types';
 
@@ -26,6 +27,23 @@ export default function AdminUsersPage() {
   const [userTasksPage, setUserTasksPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    setIsDarkMode(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const nextDark = !isDarkMode;
+    setIsDarkMode(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/auth');
@@ -81,6 +99,23 @@ export default function AdminUsersPage() {
     <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
       <AdminSidebar />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
+        <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex-1"></div>
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
+              title="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+            </button>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-850 hidden sm:block" />
+            <ProfileDropdown />
+          </div>
+        </div>
+      </header>
+
       <main className="w-full mx-auto px-4 sm:px-6 lg:px-12 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Users table */}

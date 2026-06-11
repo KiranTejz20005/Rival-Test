@@ -79,14 +79,9 @@ export default function AdminDashboard() {
       <AdminSidebar />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
         <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-black text-lg">A</span>
-            </div>
-            <h1 className="text-xl font-bold tracking-tight">Admin Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex-1"></div>
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
             <button
               onClick={toggleDarkMode}
               className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
@@ -196,6 +191,7 @@ export default function AdminDashboard() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">
                                   Task <span className="capitalize">{log.action}</span>
+                                  {log.user?.email && <span className="font-normal text-indigo-600 dark:text-indigo-400"> by {log.user.email}</span>}
                                   {log.task?.title && <span className="text-neutral-500"> &mdash; {log.task.title}</span>}
                                 </p>
                                 <p className="text-xs text-neutral-500 mt-0.5">{new Date(log.timestamp).toLocaleString()}</p>

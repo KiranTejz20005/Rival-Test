@@ -48,15 +48,20 @@ export default function ImportCsvModal({ onClose, onSuccess }: ImportCsvModalPro
         const roleIndex = headers.indexOf('role');
         const isActiveIndex = headers.indexOf('isactive');
 
+        if (roleIndex === -1 || isActiveIndex === -1) {
+          showToast('CSV must contain "role" and "isActive" columns', 'error');
+          return;
+        }
+
         const users = lines.slice(1).map(line => {
           const cols = line.split(',').map(c => c.trim());
           return {
             email: cols[emailIndex],
-            password: passwordIndex !== -1 ? cols[passwordIndex] : undefined,
-            role: roleIndex !== -1 ? cols[roleIndex] : undefined,
-            isActive: isActiveIndex !== -1 ? cols[isActiveIndex].toLowerCase() === 'true' : true
+            password: passwordIndex !== -1 && cols[passwordIndex] ? cols[passwordIndex] : undefined,
+            role: cols[roleIndex],
+            isActive: cols[isActiveIndex].toLowerCase() === 'true'
           };
-        }).filter(u => u.email);
+        }).filter(u => u.email && u.role);
 
         const result = await createBatch(users);
         showToast(`Successfully created ${result.createdCount} users (Skipped ${result.skippedCount})`, 'success');
@@ -100,7 +105,7 @@ export default function ImportCsvModal({ onClose, onSuccess }: ImportCsvModalPro
               <>
                 <Upload className="w-10 h-10 text-neutral-400 mb-3" />
                 <p className="font-semibold text-center mb-1 text-neutral-900 dark:text-white">Click to upload CSV file</p>
-                <p className="text-xs text-neutral-500 text-center">Required columns: email. Optional: password, role, isActive.</p>
+                <p className="text-xs text-neutral-500 text-center">Required columns: email, role, isActive. Optional: password.</p>
               </>
             )}
           </div>
