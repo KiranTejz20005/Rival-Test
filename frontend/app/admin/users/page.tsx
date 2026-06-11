@@ -12,7 +12,7 @@ import AdminSidebar from '../../../components/AdminSidebar';
 import CreateUserModal from '../../../components/CreateUserModal';
 import ImportCsvModal from '../../../components/ImportCsvModal';
 import ProfileDropdown from '../../../components/ProfileDropdown';
-import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo, Plus, Upload, Sun, Moon } from 'lucide-react';
+import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo, Plus, Upload, Sun, Moon, Ban } from 'lucide-react';
 import clsx from 'clsx';
 import { Task, User } from '../../../types';
 
@@ -100,9 +100,9 @@ export default function AdminUsersPage() {
       <AdminSidebar />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
         <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-4">
           <div className="flex-1"></div>
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="flex items-center justify-end gap-3 sm:gap-4">
             <button
               onClick={toggleDarkMode}
               className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
@@ -156,8 +156,8 @@ export default function AdminUsersPage() {
             ) : (
               <>
                 <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                  <div className="overflow-x-auto min-h-0">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
                       <thead>
                         <tr className="border-b border-neutral-200 dark:border-neutral-850 bg-neutral-50 dark:bg-neutral-900/50 text-neutral-500 dark:text-neutral-400 font-medium">
                           <th className="py-4 px-6 font-semibold">Email</th>
@@ -192,7 +192,7 @@ export default function AdminUsersPage() {
                                   <Eye className="w-4 h-4" />
                                 </button>
                                 <button onClick={() => handleToggleActive(u.id, u.isActive ?? true)} className="p-1.5 text-neutral-400 hover:text-amber-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" title={u.isActive ? 'Deactivate' : 'Activate'}>
-                                  {u.isActive ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                                  {u.isActive ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                                 </button>
                                 <button onClick={() => handleToggleRole(u.id, u.role ?? 'USER')} className="p-1.5 text-neutral-400 hover:text-indigo-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" title="Toggle role">
                                   {u.role === 'ADMIN' ? <Shield className="w-4 h-4 text-indigo-500" /> : <ShieldOff className="w-4 h-4" />}

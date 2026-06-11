@@ -152,9 +152,18 @@ export default function TasksPage() {
       <AdminSidebar />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
         <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex-1"></div>
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-4">
+          <div className="flex-1">
+            {user?.role !== 'ADMIN' && (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
+                  <span className="text-white dark:text-black font-black text-lg">R</span>
+                </div>
+                <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 hidden sm:block">Rival Tasks</h1>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-3 sm:gap-4">
             <button
               onClick={toggleDarkMode}
               className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
@@ -215,7 +224,7 @@ export default function TasksPage() {
 
               <button 
                 onClick={() => { setEditingTask(undefined); setIsFormOpen(true); }}
-                className="flex items-center bg-black hover:bg-neutral-850 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm gap-1.5 flex-1 sm:flex-initial justify-center"
+                className="flex items-center bg-black hover:bg-neutral-850 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm gap-1.5 shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Task</span>
@@ -238,7 +247,7 @@ export default function TasksPage() {
             isAdmin={user?.role === 'ADMIN'}
           />
         ) : (
-          <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 overflow-hidden shadow-sm">
+          <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 shadow-sm overflow-hidden flex flex-col min-h-0">
             {tasksLoading ? (
               <div className="py-24">
                 <LoadingSpinner />
@@ -255,8 +264,8 @@ export default function TasksPage() {
                 <p className="text-neutral-500 dark:text-neutral-400 text-sm">No tasks found. Create one to get started.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
+              <div className="overflow-x-auto min-h-0">
+                <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
                   <thead>
                     <tr className="border-b border-neutral-200 dark:border-neutral-850 bg-neutral-50 dark:bg-neutral-900/50 text-neutral-500 dark:text-neutral-400 font-medium">
                       <th className="py-3.5 px-6 font-semibold">Title</th>

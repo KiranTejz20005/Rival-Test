@@ -37,7 +37,10 @@ export const logTaskDeleted = async (taskId: string, userId: string, metadata?: 
 export const getTaskActivity = async (taskId: string, userId: string, role: string) => {
   const taskWhere: any = { id: taskId };
   if (role !== 'ADMIN') {
-    taskWhere.userId = userId;
+    taskWhere.OR = [
+      { userId: userId },
+      { assignedRole: role }
+    ];
   }
   
   const task = await prisma.task.findFirst({

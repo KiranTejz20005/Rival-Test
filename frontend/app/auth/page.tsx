@@ -58,8 +58,8 @@ export default function AuthPage() {
 
   if (isLoading || isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
-        <div className="flex flex-col items-center gap-4">
+      <div suppressHydrationWarning className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
+        <div suppressHydrationWarning className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-neutral-200 dark:border-neutral-800 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
           <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Loading your workspace...</p>
         </div>
@@ -68,8 +68,8 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
-      <div className="max-w-md w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-2xl p-8">
+    <div suppressHydrationWarning className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
+      <div suppressHydrationWarning className="max-w-md w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-2xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50">{isLogin ? 'Sign In' : 'Create Account'}</h1>
           <p className="text-neutral-500 dark:text-neutral-400 mt-2 text-sm">

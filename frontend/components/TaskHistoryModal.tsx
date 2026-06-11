@@ -110,7 +110,7 @@ export default function TaskHistoryModal({ taskId, taskTitle, onClose }: TaskHis
         <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-750 text-gray-800 dark:text-gray-200 rounded-md transition text-sm font-semibold"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-750 text-gray-800 dark:text-gray-200 rounded-md transition text-sm font-semibold min-h-[44px]"
           >
             Close
           </button>

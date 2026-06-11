@@ -27,7 +27,7 @@ export const getUsers = async (filters: {
   const sortOrder = filters.sortOrder || 'desc';
   orderBy[sortBy] = sortOrder;
 
-  const [users, total] = await Promise.all([
+  const [users, total, userRoleTaskCount, adminRoleTaskCount] = await Promise.all([
     prisma.user.findMany({
       where,
       orderBy,
@@ -45,10 +45,19 @@ export const getUsers = async (filters: {
         }
       }
     }),
-    prisma.user.count({ where })
+    prisma.user.count({ where }),
+    prisma.task.count({ where: { assignedRole: 'USER' } }),
+    prisma.task.count({ where: { assignedRole: 'ADMIN' } })
   ]);
 
-  return { users, total, page, pageSize };
+  const mappedUsers = users.map(user => ({
+    ...user,
+    _count: {
+      tasks: user._count.tasks + (user.role === 'ADMIN' ? adminRoleTaskCount : userRoleTaskCount)
+    }
+  }));
+
+  return { users: mappedUsers, total, page, pageSize };
 };
 
 export const getUserById = async (userId: string) => {
@@ -69,6 +78,10 @@ export const getUserById = async (userId: string) => {
   if (!user) {
     throw { status: 404, message: 'User not found' };
   }
+  
+  const roleTaskCount = await prisma.task.count({ where: { assignedRole: user.role } });
+  user._count.tasks += roleTaskCount;
+  
   return user;
 };
 
@@ -84,7 +97,15 @@ export const getUserTasks = async (userId: string, filters: {
   const pageSize = Number(filters.pageSize) || 20;
   const skip = (page - 1) * pageSize;
 
-  const where: any = { userId };
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+  if (!user) throw { status: 404, message: 'User not found' };
+
+  const where: any = {
+    OR: [
+      { userId: userId },
+      { assignedRole: user.role }
+    ]
+  };
   if (filters.status) where.status = filters.status;
   if (filters.search) {
     where.title = { contains: filters.search, mode: 'insensitive' };
