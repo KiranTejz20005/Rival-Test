@@ -71,9 +71,9 @@ export default function TaskHistoryModal({ taskId, taskTitle, onClose }: TaskHis
                     {log.changes && log.changes.length > 0 && (
                       <div className="mt-2 text-xs bg-neutral-50 dark:bg-neutral-950 p-2.5 rounded-md border border-neutral-200 dark:border-neutral-800 space-y-1">
                         {log.changes.map((change, index: number) => {
-                          const formatValue = (field: string, val: unknown) => {
+                            const formatValue = (field: string, val: unknown) => {
                             if (val === null || val === undefined) return '';
-                            if (field === 'dueDate') {
+                            if (field === 'dueDate' && typeof val === 'string') {
                               return new Date(val).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
                             }
                             return String(val);

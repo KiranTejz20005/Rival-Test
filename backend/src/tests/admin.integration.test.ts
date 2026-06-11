@@ -208,4 +208,103 @@ describe('Admin Endpoints', () => {
       expect(res.body.data).toHaveProperty('total');
     });
   });
+
+  describe('POST /api/admin/users', () => {
+    it('creates a new user as admin', async () => {
+      const res = await request(app)
+        .post('/api/admin/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ email: 'newuser@test.com', password: 'NewUser123!', role: 'USER' });
+      expect(res.status).toBe(201);
+      expect(res.body.data.email).toBe('newuser@test.com');
+    });
+
+    it('rejects duplicate email', async () => {
+      await request(app)
+        .post('/api/admin/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ email: 'dup@test.com', password: 'DupPass123!' });
+      const res = await request(app)
+        .post('/api/admin/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ email: 'dup@test.com', password: 'DupPass123!' });
+      expect(res.status).toBe(409);
+    });
+
+    it('rejects non-admin users', async () => {
+      const res = await request(app)
+        .post('/api/admin/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ email: 'shouldfail@test.com', password: 'FailPass123!' });
+      expect(res.status).toBe(403);
+    });
+  });
+
+  describe('POST /api/admin/users/batch', () => {
+    it('creates multiple users in batch', async () => {
+      const res = await request(app)
+        .post('/api/admin/users/batch')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ users: [
+          { email: 'batch1@test.com', password: 'BatchPass123!' },
+          { email: 'batch2@test.com', password: 'BatchPass123!' }
+        ]});
+      expect(res.status).toBe(201);
+      expect(res.body.data.createdCount).toBe(2);
+      expect(res.body.data.skippedCount).toBe(0);
+    });
+
+    it('skips duplicate emails in batch', async () => {
+      await request(app)
+        .post('/api/admin/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ email: 'existing@test.com', password: 'ExistPass123!' });
+      const res = await request(app)
+        .post('/api/admin/users/batch')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ users: [
+          { email: 'existing@test.com', password: 'SkipPass123!' },
+          { email: 'newbatch@test.com', password: 'NewBatch123!' }
+        ]});
+      expect(res.status).toBe(201);
+      expect(res.body.data.createdCount).toBe(1);
+    });
+
+    it('rejects empty batch', async () => {
+      const res = await request(app)
+        .post('/api/admin/users/batch')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ users: [] });
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects non-admin users', async () => {
+      const res = await request(app)
+        .post('/api/admin/users/batch')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ users: [{ email: 'noadmin@test.com', password: 'NoAdmin123!' }] });
+      expect(res.status).toBe(403);
+    });
+  });
+
+  describe('GET /api/admin/auth-logs', () => {
+    it('returns auth logs for admin', async () => {
+      await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'admin@test.com', password: 'AdminPass123!' });
+      const res = await request(app)
+        .get('/api/admin/auth-logs')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.logs.length).toBeGreaterThan(0);
+      expect(res.body.data).toHaveProperty('total');
+    });
+
+    it('rejects non-admin users', async () => {
+      const res = await request(app)
+        .get('/api/admin/auth-logs')
+        .set('Authorization', `Bearer ${userToken}`);
+      expect(res.status).toBe(403);
+    });
+  });
 });

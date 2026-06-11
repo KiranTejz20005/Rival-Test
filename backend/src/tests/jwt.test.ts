@@ -1,4 +1,4 @@
-import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken } from '../utils/jwt';
+import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken, hashToken } from '../utils/jwt';
 
 describe('JWT Utilities', () => {
   const userId = '123-abc';
@@ -39,5 +39,20 @@ describe('JWT Utilities', () => {
 
   it('should throw error for invalid token', () => {
     expect(() => verifyAccessToken('invalid.token.here')).toThrow();
+  });
+
+  it('hashToken should return deterministic SHA-256 hex', () => {
+    const token = 'test-token-value';
+    const hash1 = hashToken(token);
+    const hash2 = hashToken(token);
+    expect(hash1).toBe(hash2);
+    expect(hash1).toHaveLength(64);
+    expect(hash1).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('hashToken should produce different hashes for different inputs', () => {
+    const hash1 = hashToken('token-a');
+    const hash2 = hashToken('token-b');
+    expect(hash1).not.toBe(hash2);
   });
 });

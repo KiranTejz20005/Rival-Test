@@ -80,5 +80,51 @@ describe('Tasks Endpoints', () => {
       expect(res.body.data.tasks.every((t: { status: string }) => t.status === 'TODO')).toBe(true);
       expect(res.body.data.tasks.length).toBe(1);
     });
+
+    it('rejects invalid UUID param format', async () => {
+      const res = await request(app)
+        .get('/api/tasks/invalid-uuid')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects pageSize over 100', async () => {
+      const res = await request(app)
+        .get('/api/tasks?pageSize=999')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('GET /api/tasks/:id/activity', () => {
+    let taskId: string;
+
+    beforeEach(async () => {
+      const res = await request(app)
+        .post('/api/tasks')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Activity test task' });
+      taskId = res.body.data.id;
+    });
+
+    it('returns activity for existing task', async () => {
+      const res = await request(app)
+        .get(`/api/tasks/${taskId}/activity`)
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+    });
+
+    it('returns 404 for non-existent task UUID', async () => {
+      const res = await request(app)
+        .get('/api/tasks/00000000-0000-0000-0000-000000000000/activity')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('rejects without authentication', async () => {
+      const res = await request(app).get(`/api/tasks/${taskId}/activity`);
+      expect(res.status).toBe(401);
+    });
   });
 });
