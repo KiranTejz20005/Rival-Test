@@ -35,7 +35,7 @@ export default function TaskHistoryModal({ taskId, taskTitle, onClose }: TaskHis
   }, [taskId]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-950">
           <div>
@@ -76,18 +76,28 @@ export default function TaskHistoryModal({ taskId, taskTitle, onClose }: TaskHis
 
                     {log.changes && log.changes.length > 0 && (
                       <div className="mt-2 text-xs bg-gray-50 dark:bg-gray-950 p-2.5 rounded-md border border-gray-150 dark:border-gray-800 space-y-1">
-                        {log.changes.map((change: any, index: number) => (
-                          <div key={index} className="text-gray-600 dark:text-gray-400">
-                            <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize mr-1">{change.field}:</span>
-                            {change.oldValue !== null && change.oldValue !== undefined ? (
-                              <>
-                                <span className="line-through text-red-500 bg-red-50 dark:bg-red-950/20 px-1 rounded">{String(change.oldValue)}</span>
-                                <span className="mx-1">→</span>
-                              </>
-                            ) : null}
-                            <span className="text-green-600 bg-green-50 dark:bg-green-950/20 px-1 rounded font-medium">{String(change.newValue)}</span>
-                          </div>
-                        ))}
+                        {log.changes.map((change: any, index: number) => {
+                          const formatValue = (field: string, val: any) => {
+                            if (val === null || val === undefined) return '';
+                            if (field === 'dueDate') {
+                              return new Date(val).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                            }
+                            return String(val);
+                          };
+                          
+                          return (
+                            <div key={index} className="text-gray-600 dark:text-gray-400">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize mr-1">{change.field}:</span>
+                              {change.oldValue !== null && change.oldValue !== undefined ? (
+                                <>
+                                  <span className="line-through text-red-500 bg-red-50 dark:bg-red-950/20 px-1 rounded">{formatValue(change.field, change.oldValue)}</span>
+                                  <span className="mx-1">→</span>
+                                </>
+                              ) : null}
+                              <span className="text-green-600 bg-green-50 dark:bg-green-950/20 px-1 rounded font-medium">{formatValue(change.field, change.newValue)}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

@@ -20,6 +20,8 @@ export interface Task {
   dueDate?: string;
   createdAt: string;
   updatedAt: string;
+  userId?: string | null;
+  assignedRole?: string | null;
   user?: {
     email: string;
   };
@@ -32,6 +34,7 @@ export interface CreateTaskRequest {
   priority?: string;
   dueDate?: string;
   userId?: string;
+  assignedRole?: string;
 }
 
 export interface UserOption {

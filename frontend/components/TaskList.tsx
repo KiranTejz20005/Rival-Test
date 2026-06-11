@@ -11,6 +11,7 @@ interface TaskListProps {
   onToggleStatus: (task: Task) => void;
   onViewHistory: (task: Task) => void;
   onRetry: () => void;
+  isAdmin?: boolean;
 }
 
 export default function TaskList({ 
@@ -21,7 +22,8 @@ export default function TaskList({
   onDelete, 
   onToggleStatus, 
   onViewHistory,
-  onRetry 
+  onRetry,
+  isAdmin
 }: TaskListProps) {
   if (isLoading) {
     return <LoadingSpinner />;
@@ -56,6 +58,7 @@ export default function TaskList({
           onDelete={onDelete} 
           onToggleStatus={onToggleStatus} 
           onViewHistory={onViewHistory}
+          isAdmin={isAdmin}
         />
       ))}
     </div>

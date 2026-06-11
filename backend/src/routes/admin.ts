@@ -8,6 +8,7 @@ const router = Router();
 router.use(requireAuth);
 router.use(requireAdmin);
 
+router.post('/users', adminController.createUser);
 router.get('/users', adminController.getUsers);
 router.get('/users/:id', adminController.getUserById);
 router.get('/users/:id/tasks', adminController.getUserTasks);

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import SearchBar from '../../../components/SearchBar';
 import Pagination from '../../../components/Pagination';
+import AdminSidebar from '../../../components/AdminSidebar';
 import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo } from 'lucide-react';
 import clsx from 'clsx';
 import { Task, User } from '../../../types';
@@ -73,9 +74,11 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-      <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+      <AdminSidebar />
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
+        <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-black text-lg">U</span>
@@ -83,13 +86,6 @@ export default function AdminUsersPage() {
             <h1 className="text-xl font-bold tracking-tight">User Management</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/admin')} className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 px-2 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition gap-1.5">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Dashboard</span>
-            </button>
-            <button onClick={async () => { await logout(); router.push('/auth'); }} className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 px-2 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition gap-1.5">
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </header>
@@ -223,6 +219,7 @@ export default function AdminUsersPage() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }

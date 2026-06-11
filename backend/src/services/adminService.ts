@@ -1,4 +1,5 @@
-import { PrismaClient, Status } from '@prisma/client';
+import { PrismaClient, Status, Role } from '@prisma/client';
+import { hashPassword, validatePasswordStrength } from '../utils/password';
 
 const prisma = new PrismaClient();
 
@@ -141,6 +142,48 @@ export const updateUser = async (userId: string, updates: { role?: string; isAct
 
   return updated;
 };
+
+export const createUser = async (data: { email: string; password?: string; role?: string; isActive?: boolean }) => {
+  const normalizedEmail = data.email.toLowerCase();
+
+  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (existing) {
+    throw { status: 409, message: 'Email already exists' };
+  }
+
+  let passwordHash = '';
+  if (data.password) {
+    if (!validatePasswordStrength(data.password)) {
+      throw { status: 400, message: 'Password must be at least 8 characters long and contain uppercase, lowercase, and numbers' };
+    }
+    passwordHash = await hashPassword(data.password);
+  } else {
+    // If no password provided, you could throw error or generate a random one
+    throw { status: 400, message: 'Password is required' };
+  }
+
+  const role = (data.role === 'ADMIN' ? 'ADMIN' : 'USER') as Role;
+  const isActive = data.isActive !== undefined ? data.isActive : true;
+
+  const user = await prisma.user.create({
+    data: {
+      email: normalizedEmail,
+      passwordHash,
+      role,
+      isActive
+    },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      isActive: true,
+      createdAt: true
+    }
+  });
+
+  return user;
+};
+
 
 export const deleteUser = async (userId: string, requestingUserId: string) => {
   if (userId === requestingUserId) {

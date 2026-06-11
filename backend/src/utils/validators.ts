@@ -6,7 +6,8 @@ export const taskCreateSchema = Joi.object({
   status: Joi.string().valid('TODO', 'IN_PROGRESS', 'DONE').optional(),
   priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH').optional(),
   dueDate: Joi.date().iso().optional().allow(null),
-  userId: Joi.string().uuid().optional()
+  userId: Joi.string().uuid().optional().allow(null, ''),
+  assignedRole: Joi.string().valid('ADMIN', 'USER').optional().allow(null, '')
 });
 
 export const taskUpdateSchema = taskCreateSchema.fork(

@@ -6,7 +6,8 @@ export const taskSchema = z.object({
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
   dueDate: z.string().min(1, 'Deadline is required'),
-  userId: z.string().optional()
+  userId: z.string().optional(),
+  assignedRole: z.enum(['ADMIN', 'USER', '']).optional()
 });
 
 export const loginSchema = z.object({

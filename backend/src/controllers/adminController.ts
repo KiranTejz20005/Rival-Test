@@ -64,6 +64,18 @@ export const updateUser = async (req: Request, res: Response) => {
   });
 };
 
+export const createUser = async (req: Request, res: Response) => {
+  const { email, password, role, isActive } = req.body;
+
+  const user = await adminService.createUser({ email, password, role, isActive });
+
+  res.status(201).json({
+    data: user,
+    status: 'success',
+    timestamp: new Date().toISOString()
+  });
+};
+
 export const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   const adminId = req.user!.id;

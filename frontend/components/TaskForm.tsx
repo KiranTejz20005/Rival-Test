@@ -5,7 +5,8 @@ import { taskSchema } from '../lib/validation';
 import { z } from 'zod';
 import clsx from 'clsx';
 import { CreateTaskRequest, Task, UserOption } from '../types';
-import { X, User } from 'lucide-react';
+import { X, User, Shield } from 'lucide-react';
+import { useState } from 'react';
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
@@ -28,16 +29,20 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
       status: initialData?.status || 'TODO',
       priority: initialData?.priority || 'MEDIUM',
       dueDate: initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '',
-      userId: initialData?.userId || (isAdmin ? '' : undefined)
+      userId: initialData?.userId || '',
+      assignedRole: initialData?.assignedRole || ''
     }
   });
+
+  const [assignType, setAssignType] = useState<'USER' | 'ROLE'>(initialData?.assignedRole ? 'ROLE' : 'USER');
 
   const handleFormSubmit = async (data: TaskFormValues) => {
     try {
       await onSubmit({
         ...data,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
-        userId: isAdmin && data.userId ? data.userId : undefined
+        userId: isAdmin && assignType === 'USER' && data.userId ? data.userId : undefined,
+        assignedRole: isAdmin && assignType === 'ROLE' && data.assignedRole ? data.assignedRole : undefined
       });
     } catch (error) {
       // Error handled by parent
@@ -120,20 +125,44 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
           </div>
 
           {isAdmin && users && (
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
-                <User className="w-3 h-3" />
-                Assign to User
-              </label>
-              <select
-                {...register('userId')}
-                className={inputClasses}
-              >
-                <option value="">{initialData ? 'Keep current owner' : 'Select a user...'}</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>{u.email}</option>
-                ))}
-              </select>
+            <div className="bg-neutral-50 dark:bg-neutral-800/30 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-4 mt-2">
+              <div className="flex gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-3">
+                <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+                  <input type="radio" checked={assignType === 'USER'} onChange={() => setAssignType('USER')} className="text-indigo-600 focus:ring-indigo-500" />
+                  <User className="w-4 h-4 text-neutral-500" />
+                  Assign to User
+                </label>
+                <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+                  <input type="radio" checked={assignType === 'ROLE'} onChange={() => setAssignType('ROLE')} className="text-indigo-600 focus:ring-indigo-500" />
+                  <Shield className="w-4 h-4 text-neutral-500" />
+                  Assign to Role
+                </label>
+              </div>
+
+              {assignType === 'USER' ? (
+                <div>
+                  <select
+                    {...register('userId')}
+                    className={inputClasses}
+                  >
+                    <option value="">{initialData ? 'Keep current owner' : 'Select a user...'}</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>{u.email}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <select
+                    {...register('assignedRole')}
+                    className={inputClasses}
+                  >
+                    <option value="">Select a role...</option>
+                    <option value="USER">All Users</option>
+                    <option value="ADMIN">All Admins</option>
+                  </select>
+                </div>
+              )}
             </div>
           )}
 

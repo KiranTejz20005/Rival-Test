@@ -1,6 +1,6 @@
 import { Task } from '../types';
 import clsx from 'clsx';
-import { CheckCircle, Edit2, Trash2, Calendar, AlertCircle } from 'lucide-react';
+import { CheckCircle, Edit2, Trash2, Calendar, AlertCircle, User, Shield } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
@@ -8,9 +8,10 @@ interface TaskCardProps {
   onDelete: (id: string) => void;
   onToggleStatus: (task: Task) => void;
   onViewHistory: (task: Task) => void;
+  isAdmin?: boolean;
 }
 
-export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onViewHistory }: TaskCardProps) {
+export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onViewHistory, isAdmin }: TaskCardProps) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'DONE';
   const dueSoon = task.dueDate && new Date(task.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000 && task.status !== 'DONE';
 
@@ -89,6 +90,23 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onVie
             {task.priority === 'HIGH' && <AlertCircle className="w-2.5 h-2.5" />}
             {task.priority}
           </span>
+
+          {isAdmin && (
+            <>
+              {task.user?.email && (
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50 max-w-[100px] sm:max-w-[120px]" title={task.user.email}>
+                  <User className="w-2.5 h-2.5 shrink-0" />
+                  <span className="truncate">{task.user.email.split('@')[0]}</span>
+                </span>
+              )}
+              {task.assignedRole && (
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold tracking-wider bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 border border-purple-100 dark:border-purple-800/50" title={`Assigned to all ${task.assignedRole}s`}>
+                  <Shield className="w-2.5 h-2.5 shrink-0" />
+                  <span className="truncate">{task.assignedRole}</span>
+                </span>
+              )}
+            </>
+          )}
         </div>
 
         {task.dueDate && (

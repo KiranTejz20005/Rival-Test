@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useAdminStats, useAdminActivity, useAdminAuthLogs } from '../../hooks/useAdmin';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import AdminSidebar from '../../components/AdminSidebar';
 import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, ArrowLeft, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck } from 'lucide-react';
 
 function actionIcon(action: string) {
@@ -56,9 +57,11 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-      <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+      <AdminSidebar />
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
+        <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-black text-lg">A</span>
@@ -66,20 +69,6 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-bold tracking-tight">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push('/tasks')}
-              className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition gap-1.5"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Tasks</span>
-            </button>
-            <button
-              onClick={() => router.push('/admin/users')}
-              className="flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition gap-1.5 border border-indigo-200 dark:border-indigo-800/50"
-            >
-              <Users className="w-4 h-4" />
-              <span>Manage Users</span>
-            </button>
             <span className="text-sm text-neutral-500 dark:text-neutral-400 font-medium hidden md:inline">{user?.email}</span>
             <button
               onClick={async () => { await logout(); router.push('/auth'); }}
@@ -234,6 +223,7 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
+      </div>
     </div>
   );
 }

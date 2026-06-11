@@ -13,6 +13,7 @@ import SearchBar from '../../components/SearchBar';
 import Pagination from '../../components/Pagination';
 import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
+import AdminSidebar from '../../components/AdminSidebar';
 import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { Task, CreateTaskRequest, UserOption } from '../../types';
 import clsx from 'clsx';
@@ -146,9 +147,11 @@ export default function TasksPage() {
   if (authLoading || !isAuthenticated) return <LoadingSpinner fullScreen />;
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
-      <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+      <AdminSidebar />
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
+        <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
               <span className="text-white dark:text-black font-black text-lg">R</span>
@@ -156,21 +159,6 @@ export default function TasksPage() {
             <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">Rival Tasks</h1>
           </div>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
-            {user?.role === 'ADMIN' && (
-              <>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 px-2.5 py-1.5 rounded-lg whitespace-nowrap">
-                  <Shield className="w-3.5 h-3.5" />
-                  Viewing all tasks
-                </span>
-                <button
-                  onClick={() => router.push('/admin')}
-                  className="flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 px-2.5 py-1.5 rounded-lg transition gap-1.5 border border-indigo-200 dark:border-indigo-800/50"
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>Dashboard</span>
-                </button>
-              </>
-            )}
             <button
               onClick={toggleDarkMode}
               className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
@@ -258,6 +246,7 @@ export default function TasksPage() {
             onToggleStatus={handleToggleStatus} 
             onViewHistory={(task) => setHistoryTask(task)}
             onRetry={refetch}
+            isAdmin={user?.role === 'ADMIN'}
           />
         ) : (
           <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 overflow-hidden shadow-sm">
@@ -422,6 +411,7 @@ export default function TasksPage() {
           onClose={() => setHistoryTask(undefined)}
         />
       )}
+      </div>
     </div>
   );
 }

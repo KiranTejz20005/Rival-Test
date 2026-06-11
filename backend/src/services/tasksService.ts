@@ -1,10 +1,11 @@
-import { PrismaClient, Status, Priority } from '@prisma/client';
+import { PrismaClient, Status, Priority, Role } from '@prisma/client';
 import * as activityService from './activityService';
 
 const prisma = new PrismaClient();
 
 interface TaskCreateData {
-  userId: string;
+  userId?: string;
+  assignedRole?: Role;
   title: string;
   description?: string;
   status?: Status;
@@ -25,7 +26,8 @@ interface TaskFilters {
 export const createTask = async (data: TaskCreateData) => {
   const task = await prisma.task.create({
     data: {
-      userId: data.userId,
+      userId: data.userId || null,
+      assignedRole: data.assignedRole || null,
       title: data.title,
       description: data.description || null,
       status: data.status || Status.TODO,
@@ -46,7 +48,10 @@ export const getTasks = async (userId: string, role: string, filters: TaskFilter
   const where: any = {};
   
   if (role !== 'ADMIN') {
-    where.userId = userId;
+    where.OR = [
+      { userId: userId },
+      { assignedRole: role as Role }
+    ];
   }
   
   if (filters.status) where.status = filters.status;
@@ -83,7 +88,10 @@ export const getTasks = async (userId: string, role: string, filters: TaskFilter
 export const getTask = async (taskId: string, userId: string, role: string) => {
   const where: any = { id: taskId };
   if (role !== 'ADMIN') {
-    where.userId = userId;
+    where.OR = [
+      { userId: userId },
+      { assignedRole: role as Role }
+    ];
   }
 
   const task = await prisma.task.findFirst({
@@ -107,7 +115,10 @@ export const getTask = async (taskId: string, userId: string, role: string) => {
 export const updateTask = async (taskId: string, userId: string, role: string, updates: Partial<TaskCreateData>) => {
   const where: any = { id: taskId };
   if (role !== 'ADMIN') {
-    where.userId = userId;
+    where.OR = [
+      { userId: userId },
+      { assignedRole: role as Role }
+    ];
   }
 
   const oldTask = await prisma.task.findFirst({
@@ -122,12 +133,25 @@ export const updateTask = async (taskId: string, userId: string, role: string, u
   const fieldsToCheck = ['title', 'description', 'status', 'priority', 'dueDate'] as const;
   
   fieldsToCheck.forEach(field => {
-    if (updates[field] !== undefined && updates[field] !== oldTask[field]) {
-      changes.push({
-        field,
-        oldValue: oldTask[field],
-        newValue: updates[field]
-      });
+    if (updates[field] !== undefined) {
+      const oldVal = oldTask[field];
+      const newVal = updates[field];
+      let isDifferent = oldVal !== newVal;
+
+      if (oldVal instanceof Date && newVal instanceof Date) {
+        isDifferent = oldVal.getTime() !== newVal.getTime();
+      } else if (field === 'dueDate' && oldVal && newVal) {
+        // Fallback if one is string and other is Date
+        isDifferent = new Date(oldVal as any).getTime() !== new Date(newVal as any).getTime();
+      }
+
+      if (isDifferent) {
+        changes.push({
+          field,
+          oldValue: oldVal,
+          newValue: newVal
+        });
+      }
     }
   });
 
@@ -146,7 +170,10 @@ export const updateTask = async (taskId: string, userId: string, role: string, u
 export const deleteTask = async (taskId: string, userId: string, role: string) => {
   const where: any = { id: taskId };
   if (role !== 'ADMIN') {
-    where.userId = userId;
+    where.OR = [
+      { userId: userId },
+      { assignedRole: role as Role }
+    ];
   }
 
   const task = await prisma.task.findFirst({

@@ -8,19 +8,28 @@ const prisma = new PrismaClient();
 export const createTask = async (req: Request, res: Response) => {
   const authenticatedUserId = req.user!.id;
   const role = req.user!.role;
-  const { title, description, status, priority, dueDate, userId } = req.body;
+  const { title, description, status, priority, dueDate, userId, assignedRole } = req.body;
   
-  const targetUserId = (role === 'ADMIN' && userId) ? userId : authenticatedUserId;
-  
-  if (role === 'ADMIN' && userId) {
-    const userExists = await prisma.user.findUnique({ where: { id: userId } });
-    if (!userExists) {
-      return res.status(404).json({ error: 'User not found', status: 404, timestamp: new Date().toISOString() });
+  let targetUserId: string | undefined = authenticatedUserId;
+  let targetAssignedRole: any = undefined;
+
+  if (role === 'ADMIN') {
+    if (assignedRole) {
+      targetAssignedRole = assignedRole;
+      targetUserId = undefined;
+    } else if (userId) {
+      targetUserId = userId;
+      
+      const userExists = await prisma.user.findUnique({ where: { id: userId } });
+      if (!userExists) {
+        return res.status(404).json({ error: 'User not found', status: 404, timestamp: new Date().toISOString() });
+      }
     }
   }
   
   const task = await tasksService.createTask({
     userId: targetUserId,
+    assignedRole: targetAssignedRole,
     title,
     description,
     status: status as Status,
@@ -79,13 +88,19 @@ export const updateTask = async (req: Request, res: Response) => {
   const updates: any = { ...req.body };
   if (updates.dueDate) updates.dueDate = new Date(updates.dueDate);
   
-  if (role === 'ADMIN' && updates.userId) {
-    const userExists = await prisma.user.findUnique({ where: { id: updates.userId } });
-    if (!userExists) {
-      return res.status(404).json({ error: 'User not found', status: 404, timestamp: new Date().toISOString() });
+  if (role === 'ADMIN') {
+    if (updates.assignedRole) {
+      updates.userId = null; // Clear userId if role is assigned
+    } else if (updates.userId) {
+      updates.assignedRole = null; // Clear role if user is assigned
+      const userExists = await prisma.user.findUnique({ where: { id: updates.userId } });
+      if (!userExists) {
+        return res.status(404).json({ error: 'User not found', status: 404, timestamp: new Date().toISOString() });
+      }
     }
   } else {
     delete updates.userId;
+    delete updates.assignedRole;
   }
   
   const task = await tasksService.updateTask(taskId, userId, role, updates);

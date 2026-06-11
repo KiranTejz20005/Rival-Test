@@ -141,6 +141,27 @@ export function useAdminUpdateUser() {
   return { update, isLoading, error };
 }
 
+export function useAdminCreateUser() {
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const create = async (data: { email: string; password?: string; role?: string; isActive?: boolean }) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/api/admin/users', data);
+      setError(null);
+      return response.data.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create user');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { create, isLoading, error };
+}
+
 export function useAdminAuthLogs(filters: {
   email?: string;
   action?: string;
