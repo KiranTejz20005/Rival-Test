@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTasks, useDeleteTask, useUpdateTask, useCreateTask } from '../../hooks/useTasks';
 import { useToast } from '../../hooks/useToast';
+import { useTheme } from '../../hooks/useTheme';
 import { useRouter } from 'next/navigation';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -15,7 +16,7 @@ import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
 import AdminSidebar from '../../components/AdminSidebar';
 import ProfileDropdown from '../../components/ProfileDropdown';
-import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle, Shield } from 'lucide-react';
+import { Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Task, CreateTaskRequest, UserOption } from '../../types';
 import clsx from 'clsx';
 
@@ -23,6 +24,7 @@ export default function TasksPage() {
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
@@ -36,44 +38,22 @@ export default function TasksPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [historyTask, setHistoryTask] = useState<Task | undefined>(undefined);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [users, setUsers] = useState<UserOption[]>([]);
 
   useEffect(() => {
     if (user?.role === 'ADMIN') {
       api.get('/api/admin/users', { params: { pageSize: 100 } }).then(({ data }) => {
-        setUsers(data.data.users.map((u: any) => ({ id: u.id, email: u.email })));
+        setUsers(data.data.users.map((u: { id: string; email: string }) => ({ id: u.id, email: u.email })));
       }).catch(() => {});
     }
   }, [user?.role]);
 
   useEffect(() => {
-    const isDark = localStorage.getItem('theme') === 'dark';
-    setIsDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    // Load preferred view mode
     const savedView = localStorage.getItem('viewMode') as 'grid' | 'table';
     if (savedView === 'grid' || savedView === 'table') {
       setViewMode(savedView);
     }
   }, []);
-
-  const toggleDarkMode = () => {
-    const nextDark = !isDarkMode;
-    setIsDarkMode(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const handleViewModeChange = (mode: 'grid' | 'table') => {
     setViewMode(mode);

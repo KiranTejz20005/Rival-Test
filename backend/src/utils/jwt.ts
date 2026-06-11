@@ -23,7 +23,7 @@ export const generateAccessToken = (userId: string, email: string, role: string)
 };
 
 export const generateRefreshToken = (userId: string, email: string, role: string): string => {
-  return jwt.sign({ sub: userId, email, role }, JWT_REFRESH_SECRET, { expiresIn: '7d', algorithm: 'HS256' });
+  return jwt.sign({ sub: userId, email, role, jti: crypto.randomUUID() }, JWT_REFRESH_SECRET, { expiresIn: '7d', algorithm: 'HS256' });
 };
 
 export const verifyAccessToken = (token: string): TokenClaims => {

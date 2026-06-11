@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { validatePasswordStrength } from './password';
 
 export const taskCreateSchema = Joi.object({
   title: Joi.string().required().min(1).max(255).trim(),
@@ -17,8 +18,16 @@ export const taskUpdateSchema = taskCreateSchema.fork(
 
 export const authSignupSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).required()
-    .messages({ 'string.pattern.base': 'Password must contain uppercase, lowercase, and numbers' })
+  password: Joi.string()
+    .min(8)
+    .custom((value, helpers) => {
+      if (!validatePasswordStrength(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    }, 'Password strength validation')
+    .required()
+    .messages({ 'any.invalid': 'Password must be at least 8 characters with uppercase, lowercase, and a number' })
 });
 
 export const authLoginSchema = Joi.object({

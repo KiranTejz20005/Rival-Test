@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useAdminUsers, useAdminUserTasks, useAdminUpdateUser, useAdminDeleteUser } from '../../../hooks/useAdmin';
+import { useTheme } from '../../../hooks/useTheme';
 import { useToast } from '../../../hooks/useToast';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../../../components/LoadingSpinner';
@@ -12,7 +13,7 @@ import AdminSidebar from '../../../components/AdminSidebar';
 import CreateUserModal from '../../../components/CreateUserModal';
 import ImportCsvModal from '../../../components/ImportCsvModal';
 import ProfileDropdown from '../../../components/ProfileDropdown';
-import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo, Plus, Upload, Sun, Moon, Ban } from 'lucide-react';
+import { Shield, ShieldOff, Trash2, Eye, X, CheckCircle, ListTodo, Plus, Upload, Ban, Sun, Moon } from 'lucide-react';
 import clsx from 'clsx';
 import { Task, User } from '../../../types';
 
@@ -20,6 +21,7 @@ export default function AdminUsersPage() {
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -27,23 +29,6 @@ export default function AdminUsersPage() {
   const [userTasksPage, setUserTasksPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    setIsDarkMode(document.documentElement.classList.contains('dark'));
-  }, []);
-
-  const toggleDarkMode = () => {
-    const nextDark = !isDarkMode;
-    setIsDarkMode(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/auth');

@@ -12,7 +12,6 @@ export interface User {
 
 export interface Task {
   id: string;
-  userId: string;
   title: string;
   description?: string;
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
@@ -56,7 +55,13 @@ export interface ApiError {
   error: string;
   status: number;
   timestamp: string;
-  details?: any;
+  details?: Record<string, unknown>;
+}
+
+export interface ActivityChange {
+  field: string;
+  oldValue: unknown;
+  newValue: unknown;
 }
 
 export interface TaskFilters {
@@ -84,7 +89,7 @@ export interface ActivityLog {
   taskId: string;
   userId?: string;
   action: string;
-  changes?: any;
+  changes?: ActivityChange[];
   timestamp: string;
   task?: {
     title: string;

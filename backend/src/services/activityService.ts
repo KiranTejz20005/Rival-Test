@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Prisma, Role } from '@prisma/client';
+import prisma from '../utils/prisma';
 
 export const logTaskCreated = async (taskId: string, userId: string) => {
   await prisma.activityLog.create({
@@ -12,7 +11,7 @@ export const logTaskCreated = async (taskId: string, userId: string) => {
   });
 };
 
-export const logTaskUpdated = async (taskId: string, userId: string, changes: any) => {
+export const logTaskUpdated = async (taskId: string, userId: string, changes: Prisma.InputJsonValue[]) => {
   await prisma.activityLog.create({
     data: {
       taskId,
@@ -23,23 +22,23 @@ export const logTaskUpdated = async (taskId: string, userId: string, changes: an
   });
 };
 
-export const logTaskDeleted = async (taskId: string, userId: string, metadata?: any) => {
+export const logTaskDeleted = async (taskId: string, userId: string, metadata?: Prisma.InputJsonValue) => {
   await prisma.activityLog.create({
     data: {
       taskId,
       userId,
       action: 'deleted',
-      changes: metadata || null
+      changes: metadata || Prisma.JsonNull
     }
   });
 };
 
 export const getTaskActivity = async (taskId: string, userId: string, role: string) => {
-  const taskWhere: any = { id: taskId };
+  const taskWhere: Prisma.TaskWhereInput = { id: taskId };
   if (role !== 'ADMIN') {
     taskWhere.OR = [
       { userId: userId },
-      { assignedRole: role }
+      { assignedRole: role as Role }
     ];
   }
   

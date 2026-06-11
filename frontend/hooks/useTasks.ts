@@ -15,8 +15,9 @@ export function useTasks(filters: TaskFilters = {}) {
       setTasks(data.data.tasks);
       setTotal(data.data.total);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load tasks');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to load tasks');
     } finally {
       setLoading(false);
     }
@@ -39,8 +40,9 @@ export function useCreateTask() {
       const { data } = await api.post('/api/tasks', taskData);
       setError(null);
       return data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create task');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to create task');
       throw err;
     } finally {
       setLoading(false);
@@ -60,8 +62,9 @@ export function useUpdateTask() {
       const { data } = await api.patch(`/api/tasks/${taskId}`, updates);
       setError(null);
       return data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update task');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to update task');
       throw err;
     } finally {
       setLoading(false);
@@ -81,8 +84,9 @@ export function useDeleteTask() {
       await api.delete(`/api/tasks/${taskId}`);
       setError(null);
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete task');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to delete task');
       throw err;
     } finally {
       setLoading(false);

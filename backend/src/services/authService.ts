@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { hashPassword, comparePassword, validatePasswordStrength } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken, hashToken } from '../utils/jwt';
-
-const prisma = new PrismaClient();
+import prisma from '../utils/prisma';
 
 async function logAuthAction(email: string, action: string, ip?: string) {
   try {

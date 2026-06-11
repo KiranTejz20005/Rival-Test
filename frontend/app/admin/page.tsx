@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useAdminStats, useAdminActivity, useAdminAuthLogs } from '../../hooks/useAdmin';
+import { useAdminStats, useAdminAuthLogs } from '../../hooks/useAdmin';
+import { useTheme } from '../../hooks/useTheme';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import AdminSidebar from '../../components/AdminSidebar';
-import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, ArrowLeft, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck, Sun, Moon } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck, Sun, Moon } from 'lucide-react';
 import ProfileDropdown from '../../components/ProfileDropdown';
 
 function actionIcon(action: string) {
@@ -35,23 +36,7 @@ export default function AdminDashboard() {
   const { stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
   const { logs: authLogs, isLoading: authLogsLoading } = useAdminAuthLogs({ pageSize: 10 });
   const [tab, setTab] = useState<'activity' | 'logins'>('activity');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    setIsDarkMode(document.documentElement.classList.contains('dark'));
-  }, []);
-
-  const toggleDarkMode = () => {
-    const nextDark = !isDarkMode;
-    setIsDarkMode(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {

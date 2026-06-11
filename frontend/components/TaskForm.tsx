@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { taskSchema } from '../lib/validation';
@@ -6,7 +6,6 @@ import { z } from 'zod';
 import clsx from 'clsx';
 import { CreateTaskRequest, Task, UserOption } from '../types';
 import { X, User, Shield } from 'lucide-react';
-import { useState } from 'react';
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
@@ -30,7 +29,7 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
       priority: initialData?.priority || 'MEDIUM',
       dueDate: initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '',
       userId: initialData?.userId || '',
-      assignedRole: initialData?.assignedRole || ''
+      assignedRole: (initialData?.assignedRole as '' | 'ADMIN' | 'USER') || ''
     }
   });
 

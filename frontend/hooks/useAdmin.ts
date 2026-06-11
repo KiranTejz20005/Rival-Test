@@ -15,8 +15,9 @@ export function useAdminStats() {
       const { data } = await api.get('/api/admin/stats');
       setStats(data.data);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load stats');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to load stats');
     } finally {
       setLoading(false);
     }
@@ -46,8 +47,9 @@ export function useAdminUsers(filters: {
       setUsers(data.data.users);
       setTotal(data.data.total);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load users');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -79,8 +81,9 @@ export function useAdminUserTasks(userId: string, filters: {
       setTasks(data.data.tasks);
       setTotal(data.data.total);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load user tasks');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to load user tasks');
     } finally {
       setLoading(false);
     }
@@ -108,8 +111,9 @@ export function useAdminActivity(filters: {
       setLogs(data.data.logs);
       setTotal(data.data.total);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load activity');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to load activity');
     } finally {
       setLoading(false);
     }
@@ -130,8 +134,9 @@ export function useAdminUpdateUser() {
       const { data } = await api.patch(`/api/admin/users/${userId}`, updates);
       setError(null);
       return data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update user');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to update user');
       throw err;
     } finally {
       setLoading(false);
@@ -151,8 +156,9 @@ export function useAdminCreateUser() {
       const response = await api.post('/api/admin/users', data);
       setError(null);
       return response.data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create user');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr.response?.data?.message || 'Failed to create user');
       throw err;
     } finally {
       setLoading(false);
@@ -172,8 +178,9 @@ export function useAdminCreateUsersBatch() {
       const response = await api.post('/api/admin/users/batch', { users });
       setError(null);
       return response.data.data;
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to create users batch');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string; message?: string } } };
+      setError(axiosErr.response?.data?.error || axiosErr.response?.data?.message || 'Failed to create users batch');
       throw err;
     } finally {
       setLoading(false);
@@ -201,8 +208,9 @@ export function useAdminAuthLogs(filters: {
       setLogs(data.data.logs);
       setTotal(data.data.total);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load auth logs');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to load auth logs');
     } finally {
       setLoading(false);
     }
@@ -223,8 +231,9 @@ export function useAdminDeleteUser() {
       await api.delete(`/api/admin/users/${userId}`);
       setError(null);
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete user');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Failed to delete user');
       throw err;
     } finally {
       setLoading(false);

@@ -29,8 +29,9 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
       await create({ email, password, role, isActive });
       showToast('User created successfully', 'success');
       onSuccess();
-    } catch (error: any) {
-      showToast(error.response?.data?.message || error.message || 'Failed to create user', 'error');
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { message?: string } }; message?: string };
+      showToast(axiosErr.response?.data?.message || axiosErr.message || 'Failed to create user', 'error');
     }
   };
 

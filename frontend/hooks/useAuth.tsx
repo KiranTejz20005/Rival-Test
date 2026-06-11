@@ -47,8 +47,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('refreshToken', data.data.refreshToken);
       setUser(data.data.user);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Login failed');
       throw err;
     } finally {
       setLoading(false);
@@ -63,8 +64,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('refreshToken', data.data.refreshToken);
       setUser(data.data.user);
       setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setError(axiosErr.response?.data?.error || 'Signup failed');
       throw err;
     } finally {
       setLoading(false);

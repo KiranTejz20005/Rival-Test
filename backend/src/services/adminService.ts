@@ -1,7 +1,7 @@
-import { PrismaClient, Status, Role } from '@prisma/client';
+import { Status, Role, Prisma } from '@prisma/client';
 import { hashPassword, validatePasswordStrength } from '../utils/password';
-
-const prisma = new PrismaClient();
+import { buildPagination } from '../utils/pagination';
+import prisma from '../utils/prisma';
 
 export const getUsers = async (filters: {
   search?: string;
@@ -10,11 +10,14 @@ export const getUsers = async (filters: {
   page?: number;
   pageSize?: number;
 }) => {
-  const page = Number(filters.page) || 1;
-  const pageSize = Number(filters.pageSize) || 20;
-  const skip = (page - 1) * pageSize;
+  const { skip, take, page, pageSize, orderBy } = buildPagination({
+    page: filters.page,
+    pageSize: filters.pageSize,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder
+  });
 
-  const where: any = {};
+  const where: Prisma.UserWhereInput = {};
   if (filters.search) {
     where.OR = [
       { email: { contains: filters.search, mode: 'insensitive' } },
@@ -22,17 +25,12 @@ export const getUsers = async (filters: {
     ];
   }
 
-  const orderBy: any = {};
-  const sortBy = filters.sortBy || 'createdAt';
-  const sortOrder = filters.sortOrder || 'desc';
-  orderBy[sortBy] = sortOrder;
-
   const [users, total, userRoleTaskCount, adminRoleTaskCount] = await Promise.all([
     prisma.user.findMany({
       where,
       orderBy,
       skip,
-      take: pageSize,
+      take,
       select: {
         id: true,
         email: true,
@@ -93,14 +91,17 @@ export const getUserTasks = async (userId: string, filters: {
   page?: number;
   pageSize?: number;
 }) => {
-  const page = Number(filters.page) || 1;
-  const pageSize = Number(filters.pageSize) || 20;
-  const skip = (page - 1) * pageSize;
+  const { skip, take, page, pageSize, orderBy } = buildPagination({
+    page: filters.page,
+    pageSize: filters.pageSize,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder
+  });
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
   if (!user) throw { status: 404, message: 'User not found' };
 
-  const where: any = {
+  const where: Prisma.TaskWhereInput = {
     OR: [
       { userId: userId },
       { assignedRole: user.role }
@@ -111,17 +112,12 @@ export const getUserTasks = async (userId: string, filters: {
     where.title = { contains: filters.search, mode: 'insensitive' };
   }
 
-  const orderBy: any = {};
-  const sortBy = filters.sortBy || 'createdAt';
-  const sortOrder = filters.sortOrder || 'desc';
-  orderBy[sortBy] = sortOrder;
-
   const [tasks, total] = await Promise.all([
     prisma.task.findMany({
       where,
       orderBy,
       skip,
-      take: pageSize,
+      take,
       include: {
         user: {
           select: { email: true }
@@ -144,8 +140,8 @@ export const updateUser = async (userId: string, updates: { role?: string; isAct
     throw { status: 400, message: 'Invalid role' };
   }
 
-  const data: any = {};
-  if (updates.role !== undefined) data.role = updates.role;
+  const data: Prisma.UserUpdateInput = {};
+  if (updates.role !== undefined) data.role = updates.role as Role;
   if (updates.isActive !== undefined) data.isActive = updates.isActive;
 
   const updated = await prisma.user.update({
@@ -309,19 +305,21 @@ export const getActivityLogs = async (filters: {
   page?: number;
   pageSize?: number;
 }) => {
-  const page = Number(filters.page) || 1;
-  const pageSize = Number(filters.pageSize) || 50;
-  const skip = (page - 1) * pageSize;
+  const { skip, take, page, pageSize, orderBy } = buildPagination({
+    page: filters.page,
+    pageSize: filters.pageSize || 50,
+    sortBy: 'timestamp'
+  });
 
-  const where: any = {};
+  const where: Prisma.ActivityLogWhereInput = {};
   if (filters.action) where.action = filters.action;
 
   const [logs, total] = await Promise.all([
     prisma.activityLog.findMany({
       where,
-      orderBy: { timestamp: 'desc' },
+      orderBy,
       skip,
-      take: pageSize,
+      take,
       include: {
         task: {
           select: { title: true, userId: true }
@@ -343,20 +341,22 @@ export const getAuthLogs = async (filters: {
   page?: number;
   pageSize?: number;
 }) => {
-  const page = Number(filters.page) || 1;
-  const pageSize = Number(filters.pageSize) || 50;
-  const skip = (page - 1) * pageSize;
+  const { skip, take, page, pageSize, orderBy } = buildPagination({
+    page: filters.page,
+    pageSize: filters.pageSize || 50,
+    sortBy: 'timestamp'
+  });
 
-  const where: any = {};
+  const where: Prisma.AuthLogWhereInput = {};
   if (filters.email) where.email = { contains: filters.email, mode: 'insensitive' };
   if (filters.action) where.action = filters.action;
 
   const [logs, total] = await Promise.all([
     prisma.authLog.findMany({
       where,
-      orderBy: { timestamp: 'desc' },
+      orderBy,
       skip,
-      take: pageSize
+      take
     }),
     prisma.authLog.count({ where })
   ]);

@@ -5,15 +5,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 import authRoutes from './routes/auth';
 import tasksRoutes from './routes/tasks';
 import adminRoutes from './routes/admin';
 import { errorHandler } from './middleware/errorHandler';
-
-const prisma = new PrismaClient();
+import prisma from './utils/prisma';
 
 async function bootstrapAdmin() {
   const envEmail = process.env.ADMIN_EMAIL;

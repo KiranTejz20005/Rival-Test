@@ -37,9 +37,10 @@ export const refresh = async (req: Request, res: Response) => {
       status: 'success',
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
-    const status = error.status || 401;
-    res.status(status).json({ error: error.message || 'Invalid refresh token', status, timestamp: new Date().toISOString() });
+  } catch (error: unknown) {
+    const err = error as { status?: number; message?: string };
+    const status = err.status || 401;
+    res.status(status).json({ error: err.message || 'Invalid refresh token', status, timestamp: new Date().toISOString() });
   }
 };
 

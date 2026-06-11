@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, signupSchema } from '../../lib/validation';
 import { z } from 'zod';
 import clsx from 'clsx';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -41,9 +42,9 @@ export default function AuthPage() {
     try {
       await login(data.email, data.password);
       showToast('Successfully logged in!', 'success');
-    } catch (err: any) {
-      // Error handled by hook, but toast can be shown
-      showToast(err.response?.data?.error || 'Login failed', 'error');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      showToast(axiosErr.response?.data?.error || 'Login failed', 'error');
     }
   };
 
@@ -51,20 +52,14 @@ export default function AuthPage() {
     try {
       await signup(data.email, data.password);
       showToast('Account created successfully!', 'success');
-    } catch (err: any) {
-      showToast(err.response?.data?.error || 'Signup failed', 'error');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      showToast(axiosErr.response?.data?.error || 'Signup failed', 'error');
     }
   };
 
   if (isLoading || isAuthenticated) {
-    return (
-      <div suppressHydrationWarning className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4 transition-colors duration-200">
-        <div suppressHydrationWarning className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-neutral-200 dark:border-neutral-800 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
-          <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Loading your workspace...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
@@ -171,6 +166,34 @@ export default function AuthPage() {
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
           </button>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center mb-3 font-semibold uppercase tracking-wider">For Testing Purposes</p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(true);
+                loginForm.setValue('email', 'admin@example.com');
+                loginForm.setValue('password', 'Test@123');
+              }}
+              className="flex-1 py-2 px-3 rounded-md bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition border border-neutral-200 dark:border-neutral-800"
+            >
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(true);
+                loginForm.setValue('email', 'test1@example.com');
+                loginForm.setValue('password', 'Test@123');
+              }}
+              className="flex-1 py-2 px-3 rounded-md bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition border border-neutral-200 dark:border-neutral-800"
+            >
+              Student
+            </button>
+          </div>
         </div>
       </div>
     </div>

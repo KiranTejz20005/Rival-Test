@@ -77,7 +77,7 @@ describe('Tasks Endpoints', () => {
         .set('Authorization', `Bearer ${token}`);
       
       expect(res.status).toBe(200);
-      expect(res.body.data.tasks.every((t: any) => t.status === 'TODO')).toBe(true);
+      expect(res.body.data.tasks.every((t: { status: string }) => t.status === 'TODO')).toBe(true);
       expect(res.body.data.tasks.length).toBe(1);
     });
   });

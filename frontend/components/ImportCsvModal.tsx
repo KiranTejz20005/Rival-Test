@@ -66,8 +66,9 @@ export default function ImportCsvModal({ onClose, onSuccess }: ImportCsvModalPro
         const result = await createBatch(users);
         showToast(`Successfully created ${result.createdCount} users (Skipped ${result.skippedCount})`, 'success');
         onSuccess();
-      } catch (err: any) {
-        showToast(err.response?.data?.message || err.message || 'Failed to import CSV', 'error');
+      } catch (err: unknown) {
+        const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+        showToast(axiosErr.response?.data?.message || axiosErr.message || 'Failed to import CSV', 'error');
       }
     };
     reader.readAsText(file);
