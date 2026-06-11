@@ -15,15 +15,19 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const { login, signup, isAuthenticated, isLoading } = useAuth();
+  const { user, login, signup, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/tasks');
+      if (user?.role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push('/tasks');
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   const loginForm = useReactHookForm<LoginFormValues>({
     resolver: zodResolver(loginSchema)
@@ -37,7 +41,6 @@ export default function AuthPage() {
     try {
       await login(data.email, data.password);
       showToast('Successfully logged in!', 'success');
-      router.push('/tasks');
     } catch (err: any) {
       // Error handled by hook, but toast can be shown
       showToast(err.response?.data?.error || 'Login failed', 'error');
@@ -48,7 +51,6 @@ export default function AuthPage() {
     try {
       await signup(data.email, data.password);
       showToast('Account created successfully!', 'success');
-      router.push('/tasks');
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Signup failed', 'error');
     }

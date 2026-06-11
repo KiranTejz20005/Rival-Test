@@ -31,8 +31,8 @@ export default function AdminSidebar() {
   if (!isAuthenticated || user?.role !== 'ADMIN') return null;
 
   const links = [
-    { href: '/tasks', label: 'All Tasks', icon: ListTodo },
     { href: '/admin', label: 'Dashboard', icon: Shield },
+    { href: '/tasks', label: 'All Tasks', icon: ListTodo },
     { href: '/admin/users', label: 'Manage Users', icon: Users },
   ];
 
@@ -44,7 +44,7 @@ export default function AdminSidebar() {
         </div>
         <div className="overflow-hidden">
           <h1 className="text-base font-bold tracking-tight text-neutral-900 dark:text-neutral-50 truncate">Admin Panel</h1>
-          <p className="text-xs text-neutral-500 truncate" title={user.email}>{user.email}</p>
+          <p className="text-xs text-neutral-500 truncate">Administrator</p>
         </div>
       </div>
 
@@ -72,22 +72,6 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 space-y-1">
-        <button
-          onClick={toggleDarkMode}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-200"
-        >
-          {isDarkMode ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
-          <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-        </button>
-        <button
-          onClick={async () => { await logout(); router.push('/auth'); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          <span>Logout</span>
-        </button>
-      </div>
     </aside>
   );
 }

@@ -14,6 +14,7 @@ import Pagination from '../../components/Pagination';
 import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
 import AdminSidebar from '../../components/AdminSidebar';
+import ProfileDropdown from '../../components/ProfileDropdown';
 import { LogOut, Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { Task, CreateTaskRequest, UserOption } from '../../types';
 import clsx from 'clsx';
@@ -167,14 +168,7 @@ export default function TasksPage() {
               {isDarkMode ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
             </button>
             <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-850 hidden sm:block" />
-            <span className="text-sm text-neutral-550 dark:text-neutral-400 font-medium hidden md:inline truncate max-w-[180px]">{user?.email}</span>
-            <button
-              onClick={handleLogout}
-              className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 px-2.5 py-1.5 rounded-lg transition gap-1.5"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
+            <ProfileDropdown />
           </div>
         </div>
       </header>

@@ -6,7 +6,8 @@ import { useAdminStats, useAdminActivity, useAdminAuthLogs } from '../../hooks/u
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import AdminSidebar from '../../components/AdminSidebar';
-import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, ArrowLeft, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, ArrowLeft, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck, Sun, Moon } from 'lucide-react';
+import ProfileDropdown from '../../components/ProfileDropdown';
 
 function actionIcon(action: string) {
   switch (action) {
@@ -34,6 +35,23 @@ export default function AdminDashboard() {
   const { stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
   const { logs: authLogs, isLoading: authLogsLoading } = useAdminAuthLogs({ pageSize: 10 });
   const [tab, setTab] = useState<'activity' | 'logins'>('activity');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    setIsDarkMode(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const nextDark = !isDarkMode;
+    setIsDarkMode(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -69,14 +87,15 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-bold tracking-tight">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-neutral-500 dark:text-neutral-400 font-medium hidden md:inline">{user?.email}</span>
             <button
-              onClick={async () => { await logout(); router.push('/auth'); }}
-              className="flex items-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 px-2 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition gap-1.5"
+              onClick={toggleDarkMode}
+              className="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-lg transition"
+              title="Toggle Dark Mode"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              {isDarkMode ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
             </button>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-850 hidden sm:block" />
+            <ProfileDropdown />
           </div>
         </div>
       </header>
@@ -206,7 +225,7 @@ export default function AdminDashboard() {
                                 </p>
                                 <p className="text-xs text-neutral-500 mt-0.5">
                                   {new Date(log.timestamp).toLocaleString()}
-                                  {log.ip && <span className="ml-2 font-mono">({log.ip})</span>}
+                                  {log.ip && <span className="ml-2 font-mono">({log.ip === '::1' ? 'localhost' : log.ip})</span>}
                                 </p>
                               </div>
                             </div>
