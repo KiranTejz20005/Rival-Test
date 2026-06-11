@@ -107,6 +107,18 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Deadline</label>
+            <input
+              type="date"
+              {...register('dueDate')}
+              className={clsx(inputClasses, {
+                "border-red-500 focus:ring-red-500 dark:focus:ring-red-500": errors.dueDate
+              })}
+            />
+            {errors.dueDate && <p className="text-red-550 text-xs mt-1 font-medium">{errors.dueDate.message}</p>}
+          </div>
+
           {isAdmin && users && (
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">

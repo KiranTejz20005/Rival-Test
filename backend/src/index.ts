@@ -16,9 +16,11 @@ import { errorHandler } from './middleware/errorHandler';
 const prisma = new PrismaClient();
 
 async function bootstrapAdmin() {
-  const email = process.env.ADMIN_EMAIL;
+  const envEmail = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
-  if (!email || !password) return;
+  if (!envEmail || !password) return;
+
+  const email = envEmail.toLowerCase();
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {

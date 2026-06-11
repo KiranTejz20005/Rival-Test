@@ -13,11 +13,13 @@ async function logAuthAction(email: string, action: string, ip?: string) {
 }
 
 export const signup = async (email: string, password: string, ip?: string) => {
+  const normalizedEmail = email.toLowerCase();
+
   if (!validatePasswordStrength(password)) {
     throw { status: 400, message: 'Password must be at least 8 characters long and contain uppercase, lowercase, and numbers' };
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (existingUser) {
     throw { status: 409, message: 'Email already exists' };
   }
@@ -26,7 +28,7 @@ export const signup = async (email: string, password: string, ip?: string) => {
 
   const user = await prisma.user.create({
     data: {
-      email,
+      email: normalizedEmail,
       passwordHash
     }
   });
@@ -40,7 +42,7 @@ export const signup = async (email: string, password: string, ip?: string) => {
     data: { refreshTokenHash }
   });
 
-  await logAuthAction(email, 'SIGNUP', ip);
+  await logAuthAction(normalizedEmail, 'SIGNUP', ip);
 
   return {
     user: { id: user.id, email: user.email, role: user.role },
@@ -50,20 +52,22 @@ export const signup = async (email: string, password: string, ip?: string) => {
 };
 
 export const login = async (email: string, password: string, ip?: string) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase();
+
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user) {
-    await logAuthAction(email, 'LOGIN_FAILED', ip);
+    await logAuthAction(normalizedEmail, 'LOGIN_FAILED', ip);
     throw { status: 401, message: 'Invalid credentials' };
   }
 
   if (!user.isActive) {
-    await logAuthAction(email, 'LOGIN_FAILED', ip);
+    await logAuthAction(normalizedEmail, 'LOGIN_FAILED', ip);
     throw { status: 403, message: 'Account has been deactivated' };
   }
 
   const isPasswordValid = await comparePassword(password, user.passwordHash);
   if (!isPasswordValid) {
-    await logAuthAction(email, 'LOGIN_FAILED', ip);
+    await logAuthAction(normalizedEmail, 'LOGIN_FAILED', ip);
     throw { status: 401, message: 'Invalid credentials' };
   }
 
@@ -76,7 +80,7 @@ export const login = async (email: string, password: string, ip?: string) => {
     data: { refreshTokenHash }
   });
 
-  await logAuthAction(email, 'LOGIN_SUCCESS', ip);
+  await logAuthAction(normalizedEmail, 'LOGIN_SUCCESS', ip);
 
   return {
     user: { id: user.id, email: user.email, role: user.role },
