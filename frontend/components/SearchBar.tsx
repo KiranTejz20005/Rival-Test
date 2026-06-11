@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
@@ -8,13 +8,15 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSearch, placeholder = "Search tasks by title..." }: SearchBarProps) {
   const [value, setValue] = useState('');
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      onSearch(value);
+      onSearchRef.current(value);
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [value, onSearch]);
+  }, [value]);
 
   return (
     <div className="relative flex-1">

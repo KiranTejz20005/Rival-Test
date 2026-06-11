@@ -10,12 +10,6 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
-  
-  // Prevent caching for GET requests
-  if (config.method?.toLowerCase() === 'get') {
-    config.params = { ...config.params, _t: Date.now() };
-  }
-  
   return config;
 });
 

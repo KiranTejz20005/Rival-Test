@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTasks, useDeleteTask, useUpdateTask, useCreateTask } from '../../hooks/useTasks';
 import { useToast } from '../../hooks/useToast';
@@ -33,6 +33,12 @@ export default function TasksPage() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+
+  const handleSearchChange = useCallback((val: string) => { setSearch(val); setPage(1); }, []);
+  const handleStatusChange = useCallback((val: string) => { setStatusFilter(val); setPage(1); }, []);
+  const handlePriorityChange = useCallback((val: string) => { setPriorityFilter(val); setPage(1); }, []);
+  const handleSortByChange = useCallback((val: string) => { setSortBy(val); setPage(1); }, []);
+  const handleSortOrderChange = useCallback((val: string) => { setSortOrder(val); setPage(1); }, []);
   const pageSize = 20;
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -80,12 +86,12 @@ export default function TasksPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await logout();
     router.push('/auth');
-  };
+  }, [logout, router]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (confirm('Are you sure you want to delete this task?')) {
       try {
         await deleteTask(id);
@@ -95,9 +101,9 @@ export default function TasksPage() {
         showToast('Failed to delete task', 'error');
       }
     }
-  };
+  }, [deleteTask, showToast, refetch]);
 
-  const handleToggleStatus = async (task: Task) => {
+  const handleToggleStatus = useCallback(async (task: Task) => {
     try {
       await updateTask(task.id, { status: task.status === 'DONE' ? 'TODO' : 'DONE' });
       showToast('Task updated', 'success');
@@ -105,9 +111,9 @@ export default function TasksPage() {
     } catch {
       showToast('Failed to update task', 'error');
     }
-  };
+  }, [updateTask, showToast, refetch]);
 
-  const handleFormSubmit = async (data: CreateTaskRequest) => {
+  const handleFormSubmit = useCallback(async (data: CreateTaskRequest) => {
     try {
       if (editingTask) {
         await updateTask(editingTask.id, data);
@@ -123,7 +129,7 @@ export default function TasksPage() {
       showToast('An error occurred while saving the task', 'error');
       throw new Error();
     }
-  };
+  }, [editingTask, updateTask, createTask, showToast, refetch]);
 
   if (authLoading || !isAuthenticated) return <LoadingSpinner fullScreen />;
 
@@ -162,17 +168,17 @@ export default function TasksPage() {
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
             <div className="flex-1 flex flex-col md:flex-row gap-3">
-              <SearchBar onSearch={(val) => { setSearch(val); setPage(1); }} />
+              <SearchBar onSearch={handleSearchChange} />
               <div className="overflow-x-auto pb-1 md:pb-0 scrollbar-none">
                 <TaskFilters 
                   statusFilter={statusFilter} 
                   priorityFilter={priorityFilter} 
                   sortBy={sortBy}
                   sortOrder={sortOrder}
-                  onStatusChange={(val) => { setStatusFilter(val); setPage(1); }} 
-                  onPriorityChange={(val) => { setPriorityFilter(val); setPage(1); }} 
-                  onSortByChange={(val) => { setSortBy(val); setPage(1); }}
-                  onSortOrderChange={(val) => { setSortOrder(val); setPage(1); }}
+                  onStatusChange={handleStatusChange} 
+                  onPriorityChange={handlePriorityChange} 
+                  onSortByChange={handleSortByChange}
+                  onSortOrderChange={handleSortOrderChange}
                 />
               </div>
             </div>

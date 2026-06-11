@@ -203,21 +203,17 @@ export const createUser = async (data: { email: string; password?: string; role?
 };
 
 export const createUsersBatch = async (usersData: { email: string; password?: string; role?: string; isActive?: boolean }[]) => {
-  let createdCount = 0;
-  let skippedCount = 0;
+  const normalized = usersData.map(d => ({ ...d, email: d.email.toLowerCase().trim() }));
+  const valid = normalized.filter(d => d.email);
 
-  for (const data of usersData) {
-    const normalizedEmail = data.email.toLowerCase().trim();
-    if (!normalizedEmail) {
-      skippedCount++;
-      continue;
-    }
+  const existingEmails = await prisma.user.findMany({
+    where: { email: { in: valid.map(d => d.email) } },
+    select: { email: true }
+  });
+  const existingSet = new Set(existingEmails.map(e => e.email));
 
-    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    if (existing) {
-      skippedCount++;
-      continue;
-    }
+  const toCreate = await Promise.all(valid.map(async (data) => {
+    if (existingSet.has(data.email)) return null;
 
     let passwordHash;
     if (data.password && validatePasswordStrength(data.password)) {
@@ -227,22 +223,21 @@ export const createUsersBatch = async (usersData: { email: string; password?: st
       passwordHash = await hashPassword(randomPassword);
     }
 
-    const role = (data.role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER') as Role;
-    const isActive = data.isActive !== undefined ? Boolean(data.isActive) : true;
+    return {
+      email: data.email,
+      passwordHash,
+      role: (data.role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER') as Role,
+      isActive: data.isActive !== undefined ? Boolean(data.isActive) : true
+    };
+  }));
 
-    await prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        passwordHash,
-        role,
-        isActive
-      }
-    });
+  const creates = toCreate.filter(Boolean) as { email: string; passwordHash: string; role: Role; isActive: boolean }[];
 
-    createdCount++;
+  if (creates.length > 0) {
+    await prisma.user.createMany({ data: creates });
   }
 
-  return { createdCount, skippedCount };
+  return { createdCount: creates.length, skippedCount: usersData.length - creates.length };
 };
 
 

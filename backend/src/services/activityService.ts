@@ -53,6 +53,7 @@ export const getTaskActivity = async (taskId: string, userId: string, role: stri
   return prisma.activityLog.findMany({
     where: { taskId },
     orderBy: { timestamp: 'desc' },
+    take: 50,
     include: {
       user: { select: { email: true } }
     }

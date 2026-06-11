@@ -22,6 +22,7 @@ model User {
 
   @@index([role])
   @@index([isActive])
+  @@index([role, isActive])
   @@index([email])
   @@index([createdAt])
   @@map("users")
@@ -53,6 +54,9 @@ model Task {
   @@index([userId, status])
   @@index([userId, priority])
   @@index([userId, createdAt])
+  @@index([assignedRole, status])
+  @@index([priority, status])
+  @@index([status, dueDate])
   @@map("tasks")
 }
 
@@ -72,6 +76,7 @@ model ActivityLog {
   @@index([action])
   @@index([timestamp])
   @@index([taskId, timestamp])
+  @@index([action, timestamp])
   @@map("activity_logs")
 }
 
@@ -103,5 +108,6 @@ model AuthLog {
   @@index([action])
   @@index([timestamp])
   @@index([email, timestamp])
+  @@index([action, timestamp])
   @@map("auth_logs")
 }
