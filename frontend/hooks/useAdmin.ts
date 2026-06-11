@@ -162,6 +162,27 @@ export function useAdminCreateUser() {
   return { create, isLoading, error };
 }
 
+export function useAdminCreateUsersBatch() {
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createBatch = async (users: { email: string; password?: string; role?: string; isActive?: boolean }[]) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/api/admin/users/batch', { users });
+      setError(null);
+      return response.data.data;
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to create users batch');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { createBatch, isLoading, error };
+}
+
 export function useAdminAuthLogs(filters: {
   email?: string;
   action?: string;

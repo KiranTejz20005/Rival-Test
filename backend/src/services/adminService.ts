@@ -184,6 +184,48 @@ export const createUser = async (data: { email: string; password?: string; role?
   return user;
 };
 
+export const createUsersBatch = async (usersData: { email: string; password?: string; role?: string; isActive?: boolean }[]) => {
+  let createdCount = 0;
+  let skippedCount = 0;
+
+  for (const data of usersData) {
+    const normalizedEmail = data.email.toLowerCase().trim();
+    if (!normalizedEmail) {
+      skippedCount++;
+      continue;
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existing) {
+      skippedCount++;
+      continue;
+    }
+
+    let passwordHash = '';
+    if (data.password && validatePasswordStrength(data.password)) {
+      passwordHash = await hashPassword(data.password);
+    } else {
+      passwordHash = await hashPassword('DefaultPass123!');
+    }
+
+    const role = (data.role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER') as Role;
+    const isActive = data.isActive !== undefined ? Boolean(data.isActive) : true;
+
+    await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        passwordHash,
+        role,
+        isActive
+      }
+    });
+
+    createdCount++;
+  }
+
+  return { createdCount, skippedCount };
+};
+
 
 export const deleteUser = async (userId: string, requestingUserId: string) => {
   if (userId === requestingUserId) {

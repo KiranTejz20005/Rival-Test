@@ -9,7 +9,9 @@ import LoadingSpinner from '../../../components/LoadingSpinner';
 import SearchBar from '../../../components/SearchBar';
 import Pagination from '../../../components/Pagination';
 import AdminSidebar from '../../../components/AdminSidebar';
-import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo } from 'lucide-react';
+import CreateUserModal from '../../../components/CreateUserModal';
+import ImportCsvModal from '../../../components/ImportCsvModal';
+import { LogOut, ArrowLeft, Search, Shield, ShieldOff, Trash2, Eye, X, CheckCircle, Clock, AlertTriangle, ListTodo, Plus, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import { Task, User } from '../../../types';
 
@@ -22,6 +24,8 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userTasksPage, setUserTasksPage] = useState(1);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push('/auth');
@@ -77,25 +81,30 @@ export default function AdminUsersPage() {
     <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
       <AdminSidebar />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
-        <header className="bg-white dark:bg-neutral-900/40 border-b border-neutral-200 dark:border-neutral-800/80 backdrop-blur-md sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-black text-lg">U</span>
-            </div>
-            <h1 className="text-xl font-bold tracking-tight">User Management</h1>
-          </div>
-          <div className="flex items-center gap-3">
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <main className="w-full mx-auto px-4 sm:px-6 lg:px-12 py-10">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Users table */}
           <div className={clsx("flex-1", selectedUser && "hidden lg:block")}>
-            <div className="mb-4">
-              <SearchBar onSearch={(val) => { setSearch(val); setPage(1); }} placeholder="Search users by email..." />
+            <div className="mb-4 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
+              <div className="w-full sm:max-w-xs">
+                <SearchBar onSearch={(val) => { setSearch(val); setPage(1); }} placeholder="Search users by email..." />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsImportModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition"
+                >
+                  <Upload className="w-4 h-4" />
+                  Import CSV
+                </button>
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition shadow-sm shadow-indigo-600/20"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add User
+                </button>
+              </div>
             </div>
 
             {isLoading ? (
@@ -116,33 +125,33 @@ export default function AdminUsersPage() {
                     <table className="w-full text-left text-sm">
                       <thead>
                         <tr className="border-b border-neutral-200 dark:border-neutral-850 bg-neutral-50 dark:bg-neutral-900/50 text-neutral-500 dark:text-neutral-400 font-medium">
-                          <th className="py-3 px-4 font-semibold">Email</th>
-                          <th className="py-3 px-4 font-semibold">Role</th>
-                          <th className="py-3 px-4 font-semibold">Status</th>
-                          <th className="py-3 px-4 font-semibold">Tasks</th>
-                          <th className="py-3 px-4 font-semibold">Joined</th>
-                          <th className="py-3 px-4 text-right font-semibold">Actions</th>
+                          <th className="py-4 px-6 font-semibold">Email</th>
+                          <th className="py-4 px-6 font-semibold">Role</th>
+                          <th className="py-4 px-6 font-semibold">Status</th>
+                          <th className="py-4 px-6 font-semibold">Tasks</th>
+                          <th className="py-4 px-6 font-semibold">Joined</th>
+                          <th className="py-4 px-6 text-right font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-neutral-100 dark:divide-neutral-850">
                         {users.map((u) => (
                           <tr key={u.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-850/20 transition-colors">
-                            <td className="py-3 px-4 font-medium truncate max-w-[200px]">{u.email}</td>
-                            <td className="py-3 px-4">
-                              <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider", {
+                            <td className="py-4 px-6 font-medium text-base truncate max-w-[250px]">{u.email}</td>
+                            <td className="py-4 px-6">
+                              <span className={clsx("text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider", {
                                 "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400": u.role === 'ADMIN',
                                 "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300": u.role !== 'ADMIN',
                               })}>{u.role}</span>
                             </td>
-                            <td className="py-3 px-4">
-                              <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider", {
+                            <td className="py-4 px-6">
+                              <span className={clsx("text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider", {
                                 "bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400": u.isActive,
                                 "bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-400": !u.isActive,
                               })}>{u.isActive ? 'Active' : 'Inactive'}</span>
                             </td>
-                            <td className="py-3 px-4 text-neutral-600 dark:text-neutral-400">{u._count?.tasks ?? 0}</td>
-                            <td className="py-3 px-4 text-neutral-500 text-xs">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
-                            <td className="py-3 px-4 text-right">
+                            <td className="py-4 px-6 text-base text-neutral-600 dark:text-neutral-400">{u._count?.tasks ?? 0}</td>
+                            <td className="py-4 px-6 text-neutral-500 text-sm">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
+                            <td className="py-4 px-6 text-right">
                               <div className="flex items-center justify-end gap-1">
                                 <button onClick={() => { setSelectedUser(u); setUserTasksPage(1); }} className="p-1.5 text-neutral-400 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" title="View details">
                                   <Eye className="w-4 h-4" />
@@ -219,6 +228,26 @@ export default function AdminUsersPage() {
           )}
         </div>
       </main>
+
+      {isCreateModalOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            refetch();
+          }}
+        />
+      )}
+
+      {isImportModalOpen && (
+        <ImportCsvModal
+          onClose={() => setIsImportModalOpen(false)}
+          onSuccess={() => {
+            setIsImportModalOpen(false);
+            refetch();
+          }}
+        />
+      )}
       </div>
     </div>
   );

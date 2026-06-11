@@ -76,6 +76,21 @@ export const createUser = async (req: Request, res: Response) => {
   });
 };
 
+export const createUsersBatch = async (req: Request, res: Response) => {
+  const { users } = req.body;
+  if (!Array.isArray(users)) {
+    return res.status(400).json({ error: 'Payload must contain an array of users' });
+  }
+
+  const result = await adminService.createUsersBatch(users);
+
+  res.status(201).json({
+    data: result,
+    status: 'success',
+    timestamp: new Date().toISOString()
+  });
+};
+
 export const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   const adminId = req.user!.id;
