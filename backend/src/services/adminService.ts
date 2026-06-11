@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { Status, Role, Prisma } from '@prisma/client';
 import { hashPassword, validatePasswordStrength } from '../utils/password';
 import { buildPagination } from '../utils/pagination';
@@ -218,11 +219,12 @@ export const createUsersBatch = async (usersData: { email: string; password?: st
       continue;
     }
 
-    let passwordHash = '';
+    let passwordHash;
     if (data.password && validatePasswordStrength(data.password)) {
       passwordHash = await hashPassword(data.password);
     } else {
-      passwordHash = await hashPassword('Test@1234');
+      const randomPassword = `Temp${crypto.randomUUID().slice(0, 12)}!`;
+      passwordHash = await hashPassword(randomPassword);
     }
 
     const role = (data.role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER') as Role;

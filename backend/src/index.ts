@@ -38,7 +38,8 @@ async function bootstrapAdmin() {
 
 const app = express();
 
-app.use(cors());
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(helmet());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '1mb' }));
@@ -58,6 +59,7 @@ if (process.env.NODE_ENV !== 'test') {
 
   app.use('/api/auth/login', authLimiter);
   app.use('/api/auth/signup', authLimiter);
+  app.use('/api/auth/refresh', authLimiter);
   app.use('/api', apiLimiter);
 }
 

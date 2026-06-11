@@ -34,3 +34,36 @@ export const authLoginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required()
 });
+
+export const uuidParam = Joi.string().uuid().required();
+
+export const adminCreateUserSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).optional(),
+  role: Joi.string().valid('USER', 'ADMIN').optional(),
+  isActive: Joi.boolean().optional()
+});
+
+export const adminBatchUsersSchema = Joi.object({
+  users: Joi.array().items(Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).optional(),
+    role: Joi.string().valid('USER', 'ADMIN').optional(),
+    isActive: Joi.boolean().optional()
+  })).min(1).required()
+});
+
+export const adminUpdateUserSchema = Joi.object({
+  role: Joi.string().valid('USER', 'ADMIN').optional(),
+  isActive: Joi.boolean().optional()
+});
+
+export const paginationSchema = Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  pageSize: Joi.number().integer().min(1).max(100).optional(),
+  sortBy: Joi.string().optional(),
+  sortOrder: Joi.string().valid('asc', 'desc').optional(),
+  search: Joi.string().optional(),
+  status: Joi.string().valid('TODO', 'IN_PROGRESS', 'DONE').optional(),
+  priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH').optional()
+});

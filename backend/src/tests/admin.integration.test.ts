@@ -129,7 +129,7 @@ describe('Admin Endpoints', () => {
 
     it('returns 404 for non-existent user', async () => {
       const res = await request(app)
-        .get('/api/admin/users/non-existent-id')
+        .get('/api/admin/users/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(404);
