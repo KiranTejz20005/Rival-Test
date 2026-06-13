@@ -180,6 +180,37 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
               <Paperclip className="w-3 h-3" />
               Attachment {initialData && initialData._count?.attachments ? `(${initialData._count.attachments})` : ''}
             </label>
+            {initialData?.attachments && initialData.attachments.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {initialData.attachments.map(att => {
+                  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                  const fileUrl = `${baseUrl}/api/uploads/${att.path}`;
+                  const isImageOrPdf = att.mimeType === 'application/pdf' || att.mimeType.startsWith('image/');
+                  const isDoc = att.mimeType.includes('msword') || att.mimeType.includes('wordprocessingml.document');
+                  const previewUrl = isDoc 
+                    ? `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}` 
+                    : fileUrl;
+
+                  return (
+                    <div key={att.id} className="flex items-center justify-between bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-2 rounded-lg">
+                      <span className="text-sm text-neutral-700 dark:text-neutral-300 truncate pr-2" title={att.originalName}>
+                        {att.originalName}
+                      </span>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {(isImageOrPdf || isDoc) && (
+                          <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                            Preview
+                          </a>
+                        )}
+                        <a href={fileUrl} download={att.originalName} target="_blank" rel="noreferrer" className="text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:underline">
+                          Download
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <input
                 ref={fileInputRef}
