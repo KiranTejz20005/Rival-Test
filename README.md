@@ -115,7 +115,9 @@ This starts:
 - **Backend** on port `5000` (auto-runs migrations and seeds admin user)
 - **Frontend** on port `3000`
 
-The backend will automatically create an admin user (`admin@example.com` / `Test@123`) on first startup.
+The backend will automatically create default users on first startup:
+- **Admin:** `admin@mail.com` / `Test@1234`
+- **User (Student):** `testuser@mail.com` / `Test@1234`
 
 To stop: `docker compose down`
 
@@ -198,9 +200,3 @@ The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that
 - **SSE vs WebSockets:** Server-Sent Events (SSE) were chosen over WebSockets for real-time task updates because the communication is primarily unidirectional (server to client). This simplifies the architecture and avoids the overhead of managing bidirectional WebSocket connections, though it limits real-time client-to-server communication if needed in the future.
 - **Optimistic UI:** Implementing Optimistic UI provides a snappy user experience but introduces complexity in state management and rollback logic if the server request fails.
 - **Relational DB (PostgreSQL) vs NoSQL:** A relational database was chosen to enforce strict data integrity and relationships (e.g., users and tasks).
-
-## Project Requirements Checklist
-- [x] **Working repository** with clear setup instructions in this README.
-- [x] **`.env.example`** provided for both frontend and backend, listing all required environment variables.
-- [x] **At least 3 meaningful tests** (The backend includes a comprehensive test suite with 71 passing integration and unit tests).
-- [x] **Clean, readable commit history** maintained throughout the development process.

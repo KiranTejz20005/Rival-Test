@@ -2,7 +2,9 @@ import { useEffect, useRef } from 'react';
 
 export function useSSE(onEvent: (event: string, data: unknown) => void) {
   const onEventRef = useRef(onEvent);
-  onEventRef.current = onEvent;
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  }, [onEvent]);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');

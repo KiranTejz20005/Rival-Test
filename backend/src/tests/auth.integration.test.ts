@@ -61,8 +61,9 @@ describe('Auth Endpoints', () => {
 
   describe('POST /api/auth/login', () => {
     beforeEach(async () => {
-      await request(app).post('/api/auth/signup')
+      const res = await request(app).post('/api/auth/signup')
         .send({ email: 'login@example.com', password: 'LoginPass123!' });
+      if (res.status !== 201) console.error("Login beforeEach signup failed:", res.status, res.body);
     });
 
     it('returns tokens for valid credentials', async () => {

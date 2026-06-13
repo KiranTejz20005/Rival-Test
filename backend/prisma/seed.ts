@@ -6,14 +6,14 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding data...');
 
-  const passwordHash = await bcrypt.hash('Test@123', 12);
+  const passwordHash = await bcrypt.hash('Test@1234', 12);
 
-  // Test User 1
+  // Test User 1 (Student/User)
   const user1 = await prisma.user.upsert({
-    where: { email: 'test1@example.com' },
+    where: { email: 'testuser@mail.com' },
     update: {},
     create: {
-      email: 'test1@example.com',
+      email: 'testuser@mail.com',
       passwordHash,
     },
   });
@@ -30,10 +30,10 @@ async function main() {
 
   // Admin User
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
+    where: { email: 'admin@mail.com' },
     update: {},
     create: {
-      email: 'admin@example.com',
+      email: 'admin@mail.com',
       passwordHash,
       role: 'ADMIN',
     },

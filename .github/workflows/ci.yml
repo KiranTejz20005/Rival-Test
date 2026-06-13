@@ -43,6 +43,11 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Setup database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/task_management_test
+
       - name: Run tests
         run: npm test
         env:

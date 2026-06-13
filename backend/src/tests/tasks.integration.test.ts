@@ -17,6 +17,7 @@ describe('Tasks Endpoints', () => {
       .post('/api/auth/signup')
       .send({ email: 'tasks@example.com', password: 'TaskPass123!' });
 
+    if (res.status !== 201) console.error("Tasks beforeEach signup failed:", res.status, res.body);
     token = res.body.data.accessToken;
     userId = res.body.data.user.id;
   });
