@@ -63,7 +63,7 @@ export const paginationSchema = Joi.object({
   pageSize: Joi.number().integer().min(1).max(100).optional(),
   sortBy: Joi.string().optional(),
   sortOrder: Joi.string().valid('asc', 'desc').optional(),
-  search: Joi.string().optional(),
-  status: Joi.string().valid('TODO', 'IN_PROGRESS', 'DONE').optional(),
-  priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH').optional()
+  search: Joi.string().optional().allow(''),
+  status: Joi.string().valid('TODO', 'IN_PROGRESS', 'DONE', '').optional().allow(''),
+  priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH', '').optional().allow('')
 });

@@ -206,8 +206,9 @@ export default function AuthPage() {
               type="button"
               onClick={() => {
                 setIsLogin(true);
-                loginForm.setValue('email', 'admin@example.com');
-                loginForm.setValue('password', 'Test@123');
+                loginForm.setValue('email', 'admin@mail.com');
+                loginForm.setValue('password', 'Test@1234');
+                onLoginSubmit({ email: 'admin@mail.com', password: 'Test@1234' });
               }}
               className="flex-1 py-2 px-3 rounded-md bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition border border-neutral-200 dark:border-neutral-800"
             >
@@ -217,8 +218,9 @@ export default function AuthPage() {
               type="button"
               onClick={() => {
                 setIsLogin(true);
-                loginForm.setValue('email', 'test1@example.com');
-                loginForm.setValue('password', 'Test@123');
+                loginForm.setValue('email', 'testuser@mail.com');
+                loginForm.setValue('password', 'Test@1234');
+                onLoginSubmit({ email: 'testuser@mail.com', password: 'Test@1234' });
               }}
               className="flex-1 py-2 px-3 rounded-md bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition border border-neutral-200 dark:border-neutral-800"
             >
