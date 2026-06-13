@@ -28,6 +28,10 @@ export interface Task {
   createdBy?: {
     email: string;
   };
+  attachments?: Attachment[];
+  _count?: {
+    attachments: number;
+  };
 }
 
 export interface CreateTaskRequest {
@@ -113,4 +117,14 @@ export interface PaginatedResult<T> {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export interface Attachment {
+  id: string;
+  taskId: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  createdAt: string;
 }

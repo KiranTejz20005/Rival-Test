@@ -44,6 +44,7 @@ model Task {
   user         User?         @relation("TaskAssignee", fields: [userId], references: [id], onDelete: Cascade)
   createdBy    User?         @relation("TaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
   activityLogs ActivityLog[]
+  attachments  Attachment[]
 
   @@index([userId])
   @@index([createdById])
@@ -110,4 +111,19 @@ model AuthLog {
   @@index([email, timestamp])
   @@index([action, timestamp])
   @@map("auth_logs")
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  taskId       String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  createdAt    DateTime @default(now())
+
+  task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("attachments")
 }

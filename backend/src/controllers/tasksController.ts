@@ -4,6 +4,7 @@ import * as tasksService from '../services/tasksService';
 import type { TaskCreateData } from '../services/tasksService';
 import * as activityService from '../services/activityService';
 import prisma from '../utils/prisma';
+import { broadcast } from '../utils/sse';
 
 export const createTask = async (req: Request, res: Response) => {
   const authenticatedUserId = req.user!.id;
@@ -37,6 +38,8 @@ export const createTask = async (req: Request, res: Response) => {
     dueDate: dueDate ? new Date(dueDate) : undefined
   }, authenticatedUserId);
   
+  broadcast('task_created', task, targetUserId);
+
   res.status(201).json({
     data: task,
     status: 'success',
@@ -108,6 +111,8 @@ export const updateTask = async (req: Request, res: Response) => {
   
   const task = await tasksService.updateTask(taskId, userId, role, updates);
   
+  broadcast('task_updated', task);
+
   res.status(200).json({
     data: task,
     status: 'success',
@@ -122,6 +127,8 @@ export const deleteTask = async (req: Request, res: Response) => {
   
   await tasksService.deleteTask(taskId, userId, role);
   
+  broadcast('task_deleted', { id: taskId });
+
   res.status(200).json({
     message: 'task deleted',
     status: 'success',

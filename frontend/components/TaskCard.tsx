@@ -1,9 +1,10 @@
-import { Task } from '../types';
+import { Task, Attachment } from '../types';
 import clsx from 'clsx';
-import { CheckCircle, Edit2, Trash2, Calendar, AlertCircle, User, Shield } from 'lucide-react';
+import { CheckCircle, Edit2, Trash2, Calendar, AlertCircle, User, Shield, Paperclip } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
+  attachments?: Attachment[];
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (task: Task) => void;
@@ -11,7 +12,7 @@ interface TaskCardProps {
   isAdmin?: boolean;
 }
 
-export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onViewHistory, isAdmin }: TaskCardProps) {
+export default function TaskCard({ task, attachments, onEdit, onDelete, onToggleStatus, onViewHistory, isAdmin }: TaskCardProps) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'DONE';
   const dueSoon = task.dueDate && new Date(task.dueDate).getTime() - new Date().getTime() < 3 * 24 * 60 * 60 * 1000 && task.status !== 'DONE';
 
@@ -62,6 +63,12 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleStatus, onVie
           <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-2 line-clamp-2 leading-relaxed">
             {task.description}
           </p>
+        )}
+        {attachments && attachments.length > 0 && (
+          <div className="flex items-center gap-1.5 mt-2 text-[10px] text-neutral-400 dark:text-neutral-500">
+            <Paperclip className="w-3 h-3" />
+            <span>{attachments.length} file{attachments.length > 1 ? 's' : ''}</span>
+          </div>
         )}
       </div>
       

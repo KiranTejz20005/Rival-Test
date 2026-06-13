@@ -6,6 +6,7 @@ import { useTasks, useDeleteTask, useUpdateTask, useCreateTask } from '../../hoo
 import { useToast } from '../../hooks/useToast';
 import { useTheme } from '../../hooks/useTheme';
 import { useRouter } from 'next/navigation';
+import { useSSE } from '../../hooks/useSSE';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import TaskList from '../../components/TaskList';
@@ -66,7 +67,7 @@ export default function TasksPage() {
     localStorage.setItem('viewMode', mode);
   };
 
-  const { tasks, total, isLoading: tasksLoading, error: tasksError, refetch } = useTasks({
+  const { tasks, setTasks, total, isLoading: tasksLoading, error: tasksError, refetch, optimisticDelete, optimisticUpdate } = useTasks({
     status: statusFilter,
     priority: priorityFilter,
     search,
@@ -86,6 +87,12 @@ export default function TasksPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
+  useSSE(useCallback((event, data) => {
+    if (event === 'task_created' || event === 'task_updated' || event === 'task_deleted') {
+      refetch();
+    }
+  }, [refetch]));
+
   const handleLogout = useCallback(async () => {
     await logout();
     router.push('/auth');
@@ -93,25 +100,43 @@ export default function TasksPage() {
 
   const handleDelete = useCallback(async (id: string) => {
     if (confirm('Are you sure you want to delete this task?')) {
+      const previous = tasks;
+      optimisticDelete(id);
       try {
         await deleteTask(id);
         showToast('Task deleted', 'success');
-        refetch();
       } catch {
         showToast('Failed to delete task', 'error');
+        setTasks(previous);
       }
     }
-  }, [deleteTask, showToast, refetch]);
+  }, [deleteTask, showToast, optimisticDelete]);
 
   const handleToggleStatus = useCallback(async (task: Task) => {
+    const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+    const previousTasks = tasks;
+    optimisticUpdate(task.id, { status: newStatus as Task['status'] });
     try {
-      await updateTask(task.id, { status: task.status === 'DONE' ? 'TODO' : 'DONE' });
+      await updateTask(task.id, { status: newStatus });
       showToast('Task updated', 'success');
-      refetch();
     } catch {
       showToast('Failed to update task', 'error');
+      setTasks(previousTasks);
     }
-  }, [updateTask, showToast, refetch]);
+  }, [updateTask, showToast, optimisticUpdate, tasks]);
+
+  const handleFileUpload = useCallback(async (taskId: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post(`/api/attachments/${taskId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      showToast('File uploaded', 'success');
+    } catch {
+      showToast('Failed to upload file', 'error');
+    }
+  }, [showToast]);
 
   const handleFormSubmit = useCallback(async (data: CreateTaskRequest) => {
     try {
@@ -385,6 +410,7 @@ export default function TasksPage() {
           onClose={() => { setIsFormOpen(false); setEditingTask(undefined); }}
           users={user?.role === 'ADMIN' ? users : undefined}
           isAdmin={user?.role === 'ADMIN'}
+          onFileUpload={handleFileUpload}
         />
       )}
 

@@ -6,13 +6,18 @@ A full-stack, production-grade task management application built with Node.js, E
 
 - **Authentication:** Secure JWT-based authentication with bcrypt password hashing, access + refresh token rotation, and logout.
 - **Task Management:** Create, read, update, and delete tasks with full ownership enforcement.
-- **Filtering & Pagination:** Filter tasks by status, priority, and search title. Built-in cursor-based pagination with limit/offset.
-- **Admin Dashboard:** User management (list, search, view, update role, delete), global stats, and activity log.
+- **Filtering & Pagination:** Filter tasks by status, priority, and search title. Built-in limit/offset pagination.
+- **Search & Sort:** Search tasks by title (case-insensitive). Sort by due date, priority, or created date.
+- **Admin Dashboard:** User management (list, search, view, update role, delete), global stats, activity log, and auth log viewer.
+- **Task Attachments:** Upload files (images, PDFs, docs) to tasks via drag-and-drop or file picker.
+- **Real-time Updates:** Server-Sent Events (SSE) push task changes (create, update, delete) live to clients.
+- **Optimistic UI:** UI updates immediately before server confirmation, with automatic rollback on failure.
 - **Security:** Helmet headers, rate limiting (auth: 20/15min, API: 200/15min), request body size limit (1 MB), CORS.
-- **Activity Logging:** Tracks creation and updates to tasks automatically.
+- **Activity Logging:** Tracks creation and updates to tasks automatically with field-level change tracking.
 - **Input Validation:** All inputs validated via Joi schemas on the backend and Zod on the frontend.
-- **Modern UI:** Responsive design built with Tailwind CSS, React Hook Form, and Zod validation.
+- **Modern UI:** Responsive design built with Tailwind CSS (mobile + desktop), dark mode with persisted preference.
 - **CI/CD:** GitHub Actions workflow for automated testing, type checking, and building.
+- **Docker:** Docker Compose setup for one-command local development.
 
 ## Tech Stack
 
@@ -97,6 +102,23 @@ cd frontend
 npm run dev
 ```
 
+## Docker Setup
+
+Run the entire application (PostgreSQL + backend + frontend) with a single command:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+- **PostgreSQL 16** on port `5432`
+- **Backend** on port `5000` (auto-runs migrations and seeds admin user)
+- **Frontend** on port `3000`
+
+The backend will automatically create an admin user (`admin@example.com` / `Test@123`) on first startup.
+
+To stop: `docker compose down`
+
 ## Testing
 
 ```bash
@@ -106,7 +128,7 @@ npm run test:watch # Watch mode
 npm run test:coverage # With coverage
 ```
 
-All 47 integration and unit tests pass.
+All 71 integration and unit tests pass.
 
 ## API Endpoints
 
@@ -126,6 +148,11 @@ All 47 integration and unit tests pass.
 | GET | `/api/tasks/:id` | Get single task |
 | PATCH | `/api/tasks/:id` | Update task |
 | DELETE | `/api/tasks/:id` | Delete task |
+| GET | `/api/tasks/:id/activity` | Get task activity log |
+| GET | `/api/tasks/events` | SSE stream for real-time task updates (pass `?token=` or `Authorization` header) |
+| POST | `/api/attachments/:taskId` | Upload file attachment to task |
+| GET | `/api/attachments/:taskId` | List task attachments |
+| DELETE | `/api/attachments/:attachmentId` | Delete attachment |
 
 ### Admin (requires admin role + Bearer token)
 | Method | Path | Description |
@@ -136,7 +163,10 @@ All 47 integration and unit tests pass.
 | GET | `/api/admin/users/:id/tasks` | Get user's tasks |
 | PATCH | `/api/admin/users/:id` | Update user role |
 | DELETE | `/api/admin/users/:id` | Delete user |
+| POST | `/api/admin/users` | Create a user |
+| POST | `/api/admin/users/batch` | Batch create users (skips duplicates) |
 | GET | `/api/admin/activity` | Activity log |
+| GET | `/api/admin/auth-logs` | Authentication logs |
 
 ## Error Handling
 All API errors follow a standardized format:

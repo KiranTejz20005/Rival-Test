@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { taskSchema } from '../lib/validation';
 import { z } from 'zod';
 import clsx from 'clsx';
 import { CreateTaskRequest, Task, UserOption } from '../types';
-import { X, User, Shield } from 'lucide-react';
+import { X, User, Shield, Paperclip } from 'lucide-react';
+import api from '../lib/api';
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
@@ -15,9 +16,10 @@ interface TaskFormProps {
   onClose: () => void;
   users?: UserOption[];
   isAdmin?: boolean;
+  onFileUpload?: (taskId: string, file: File) => Promise<void>;
 }
 
-export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmin }: TaskFormProps) {
+export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmin, onFileUpload }: TaskFormProps) {
   const isEdit = !!initialData;
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<TaskFormValues>({
@@ -34,6 +36,9 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
   });
 
   const [assignType, setAssignType] = useState<'USER' | 'ROLE'>(initialData?.assignedRole ? 'ROLE' : 'USER');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFormSubmit = async (data: TaskFormValues) => {
     try {
@@ -162,6 +167,43 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
                   </select>
                 </div>
               )}
+            </div>
+          )}
+
+          {initialData && (
+            <div className="bg-neutral-50 dark:bg-neutral-800/30 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                <Paperclip className="w-3 h-3" />
+                Attachments {initialData._count?.attachments ? `(${initialData._count.attachments})` : ''}
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                  className="block w-full text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white dark:file:bg-white dark:file:text-black hover:file:opacity-90 cursor-pointer"
+                />
+                {uploadFile && onFileUpload && (
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    onClick={async () => {
+                      if (!uploadFile) return;
+                      setUploading(true);
+                      try {
+                        await onFileUpload(initialData.id, uploadFile);
+                        setUploadFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                    className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-50"
+                  >
+                    {uploading ? '...' : 'Upload'}
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

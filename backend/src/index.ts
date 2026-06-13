@@ -6,10 +6,12 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
 import bcrypt from 'bcryptjs';
+import path from 'path';
 
 import authRoutes from './routes/auth';
 import tasksRoutes from './routes/tasks';
 import adminRoutes from './routes/admin';
+import uploadRoutes from './routes/upload';
 import { errorHandler } from './middleware/errorHandler';
 import prisma from './utils/prisma';
 
@@ -63,9 +65,11 @@ if (process.env.NODE_ENV !== 'test') {
   app.use('/api', apiLimiter);
 }
 
+app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/attachments', uploadRoutes);
 
 app.use(errorHandler);
 

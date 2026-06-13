@@ -74,6 +74,11 @@ export const getTasks = async (userId: string, role: string, filters: TaskFilter
           select: {
             email: true
           }
+        },
+        _count: {
+          select: {
+            attachments: true
+          }
         }
       }
     }),
@@ -97,6 +102,21 @@ export const getTask = async (taskId: string, userId: string, role: string) => {
       createdBy: {
         select: {
           email: true
+        }
+      },
+      attachments: {
+        select: {
+          id: true,
+          originalName: true,
+          mimeType: true,
+          size: true,
+          createdAt: true
+        },
+        orderBy: { createdAt: 'desc' }
+      },
+      _count: {
+        select: {
+          attachments: true
         }
       }
     }

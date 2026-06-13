@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../lib/api';
 import { Task, TaskFilters, CreateTaskRequest } from '../types';
 
@@ -7,6 +7,7 @@ export function useTasks(filters: TaskFilters = {}) {
   const [total, setTotal] = useState(0);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const prevFilters = useRef('');
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -24,10 +25,29 @@ export function useTasks(filters: TaskFilters = {}) {
   }, [filters.status, filters.priority, filters.search, filters.page, filters.sortBy, filters.sortOrder]);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    const key = JSON.stringify(filters);
+    if (key !== prevFilters.current) {
+      prevFilters.current = key;
+      fetchTasks();
+    }
+  }, [fetchTasks, filters]);
 
-  return { tasks, total, isLoading, error, refetch: fetchTasks };
+  const optimisticDelete = useCallback((taskId: string) => {
+    const previous = { tasks, total };
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    setTotal(prev => Math.max(0, prev - 1));
+    return previous;
+  }, [tasks, total]);
+
+  const optimisticUpdate = useCallback((taskId: string, updates: Partial<Task>) => {
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...updates } : t));
+  }, []);
+
+  const optimisticAdd = useCallback((task: Task) => {
+    setTotal(prev => prev + 1);
+  }, []);
+
+  return { tasks, total, isLoading, error, refetch: fetchTasks, setTasks, setTotal, optimisticDelete, optimisticUpdate, optimisticAdd };
 }
 
 export function useCreateTask() {

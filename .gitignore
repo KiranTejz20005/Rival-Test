@@ -8,3 +8,5 @@ coverage/
 .next/
 out/
 .agent/
+uploads/
+!backend/uploads/.gitkeep
