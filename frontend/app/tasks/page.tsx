@@ -143,13 +143,18 @@ export default function TasksPage() {
       if (editingTask) {
         await updateTask(editingTask.id, data);
         showToast('Task updated successfully', 'success');
+        setIsFormOpen(false);
+        setEditingTask(undefined);
+        refetch();
+        return undefined;
       } else {
-        await createTask(data);
+        const task = await createTask(data);
         showToast('Task created successfully', 'success');
+        setIsFormOpen(false);
+        setEditingTask(undefined);
+        refetch();
+        return task?.id;
       }
-      setIsFormOpen(false);
-      setEditingTask(undefined);
-      refetch();
     } catch {
       showToast('An error occurred while saving the task', 'error');
       throw new Error();

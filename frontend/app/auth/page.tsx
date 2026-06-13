@@ -10,12 +10,16 @@ import { loginSchema, signupSchema } from '../../lib/validation';
 import { z } from 'zod';
 import clsx from 'clsx';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { Eye, EyeOff } from 'lucide-react';
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { user, login, signup, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
@@ -89,15 +93,24 @@ export default function AuthPage() {
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Password</label>
-              <input
-                {...loginForm.register('password')}
-                type="password"
-                className={clsx(
-                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
-                  { "border-red-500 dark:border-red-500": loginForm.formState.errors.password }
-                )}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  {...loginForm.register('password')}
+                  type={showPassword ? 'text' : 'password'}
+                  className={clsx(
+                    "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 pr-10 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                    { "border-red-500 dark:border-red-500": loginForm.formState.errors.password }
+                  )}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {loginForm.formState.errors.password && <p className="text-red-500 text-xs mt-1">{loginForm.formState.errors.password.message}</p>}
             </div>
             <button
@@ -125,28 +138,46 @@ export default function AuthPage() {
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Password</label>
-              <input
-                {...signupForm.register('password')}
-                type="password"
-                className={clsx(
-                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
-                  { "border-red-500 dark:border-red-500": signupForm.formState.errors.password }
-                )}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  {...signupForm.register('password')}
+                  type={showSignupPassword ? 'text' : 'password'}
+                  className={clsx(
+                    "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 pr-10 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                    { "border-red-500 dark:border-red-500": signupForm.formState.errors.password }
+                  )}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignupPassword(!showSignupPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition"
+                >
+                  {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {signupForm.formState.errors.password && <p className="text-red-500 text-xs mt-1">{signupForm.formState.errors.password.message}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Confirm Password</label>
-              <input
-                {...signupForm.register('confirmPassword')}
-                type="password"
-                className={clsx(
-                  "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
-                  { "border-red-500 dark:border-red-500": signupForm.formState.errors.confirmPassword }
-                )}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  {...signupForm.register('confirmPassword')}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  className={clsx(
+                    "block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3.5 py-2 pr-10 text-sm text-neutral-900 dark:text-neutral-50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition",
+                    { "border-red-500 dark:border-red-500": signupForm.formState.errors.confirmPassword }
+                  )}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {signupForm.formState.errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{signupForm.formState.errors.confirmPassword.message}</p>}
             </div>
             <button

@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -18,12 +18,21 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = /\.(png|jpg|jpeg|gif|pdf|doc|docx|xlsx|csv|txt)$/i;
-  if (allowed.test(path.extname(file.originalname))) {
+const allowedExtensions = /\.(png|jpg|jpeg|gif|pdf|doc|docx|xlsx|csv|txt)$/i;
+const allowedMimes = [
+  'image/png', 'image/jpeg', 'image/gif',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv', 'text/plain'
+];
+
+const fileFilter = (_req: unknown, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  if (allowedExtensions.test(path.extname(file.originalname)) && allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type'));
+    cb(new Error('Invalid file type. Allowed: PNG, JPG, GIF, PDF, DOC, DOCX, XLSX, CSV, TXT'));
   }
 };
 
@@ -33,9 +42,37 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }
 });
 
+function handleMulterError(err: unknown, _req: Request, res: Response, next: NextFunction) {
+  if (err instanceof multer.MulterError) {
+    const messages: Record<string, string> = {
+      LIMIT_FILE_SIZE: 'File too large. Maximum size is 10 MB',
+      LIMIT_FILE_COUNT: 'Too many files',
+      LIMIT_UNEXPECTED_FILE: 'Unexpected file field'
+    };
+    return res.status(400).json({
+      error: messages[err.code] || err.message,
+      status: 400,
+      timestamp: new Date().toISOString()
+    });
+  }
+  if (err instanceof Error) {
+    return res.status(400).json({
+      error: err.message,
+      status: 400,
+      timestamp: new Date().toISOString()
+    });
+  }
+  next(err);
+}
+
 const router = Router();
 
-router.post('/:taskId', requireAuth, upload.single('file'), async (req: Request, res: Response) => {
+router.post('/:taskId', requireAuth, (req: Request, res: Response, next: NextFunction) => {
+  upload.single('file')(req, res, (err: unknown) => {
+    if (err) return handleMulterError(err, req, res, next);
+    next();
+  });
+}, async (req: Request, res: Response) => {
   const { taskId } = req.params;
   const userId = req.user!.id;
 

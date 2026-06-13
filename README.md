@@ -180,3 +180,27 @@ The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that
 
 - **Backend:** installs dependencies, runs TypeScript check, runs all tests with a PostgreSQL service container, builds
 - **Frontend:** installs dependencies, runs lint, runs TypeScript check, builds
+
+## Assumptions, Implementation Decisions, & Trade-offs
+
+### Assumptions
+- **User Roles:** The system assumes two primary roles: `USER` and `ADMIN`. Admins have global access to manage all users and view global statistics, while regular users can only manage their own tasks.
+- **Environment:** It is assumed that the application will be run in a containerized environment (Docker) or a standard Node.js environment with access to a PostgreSQL database.
+- **Real-time Updates:** Assumes clients support Server-Sent Events (SSE) for real-time task updates.
+
+### Implementation Decisions
+- **Next.js App Router:** Chosen for the frontend to leverage Server Components and modern routing paradigms, improving performance and developer experience.
+- **Prisma ORM:** Used for database interactions to ensure type safety and simplify schema migrations with PostgreSQL.
+- **JWT & Refresh Tokens:** Implemented a dual-token system for authentication to balance security (short-lived access tokens) and user experience (long-lived refresh tokens).
+- **Zod & Joi Validation:** Zod is used on the frontend for form validation, while Joi is used on the backend for API request validation, ensuring robust data integrity across the stack.
+
+### Trade-offs
+- **SSE vs WebSockets:** Server-Sent Events (SSE) were chosen over WebSockets for real-time task updates because the communication is primarily unidirectional (server to client). This simplifies the architecture and avoids the overhead of managing bidirectional WebSocket connections, though it limits real-time client-to-server communication if needed in the future.
+- **Optimistic UI:** Implementing Optimistic UI provides a snappy user experience but introduces complexity in state management and rollback logic if the server request fails.
+- **Relational DB (PostgreSQL) vs NoSQL:** A relational database was chosen to enforce strict data integrity and relationships (e.g., users and tasks).
+
+## Project Requirements Checklist
+- [x] **Working repository** with clear setup instructions in this README.
+- [x] **`.env.example`** provided for both frontend and backend, listing all required environment variables.
+- [x] **At least 3 meaningful tests** (The backend includes a comprehensive test suite with 71 passing integration and unit tests).
+- [x] **Clean, readable commit history** maintained throughout the development process.

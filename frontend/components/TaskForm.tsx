@@ -12,7 +12,7 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 
 interface TaskFormProps {
   initialData?: Task;
-  onSubmit: (data: CreateTaskRequest) => Promise<void>;
+  onSubmit: (data: CreateTaskRequest) => Promise<string | undefined>;
   onClose: () => void;
   users?: UserOption[];
   isAdmin?: boolean;
@@ -42,12 +42,17 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
 
   const handleFormSubmit = async (data: TaskFormValues) => {
     try {
-      await onSubmit({
+      const taskId = await onSubmit({
         ...data,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
         userId: isAdmin && assignType === 'USER' && data.userId ? data.userId : undefined,
         assignedRole: isAdmin && assignType === 'ROLE' && data.assignedRole ? data.assignedRole : undefined
       });
+      if (taskId && uploadFile && onFileUpload) {
+        await onFileUpload(taskId, uploadFile);
+        setUploadFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
     } catch (error) {
       // Error handled by parent
     }
@@ -170,42 +175,41 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
             </div>
           )}
 
-          {initialData && (
-            <div className="bg-neutral-50 dark:bg-neutral-800/30 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3">
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
-                <Paperclip className="w-3 h-3" />
-                Attachments {initialData._count?.attachments ? `(${initialData._count.attachments})` : ''}
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                  className="block w-full text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white dark:file:bg-white dark:file:text-black hover:file:opacity-90 cursor-pointer"
-                />
-                {uploadFile && onFileUpload && (
-                  <button
-                    type="button"
-                    disabled={uploading}
-                    onClick={async () => {
-                      if (!uploadFile) return;
-                      setUploading(true);
-                      try {
-                        await onFileUpload(initialData.id, uploadFile);
-                        setUploadFile(null);
-                        if (fileInputRef.current) fileInputRef.current.value = '';
-                      } finally {
-                        setUploading(false);
-                      }
-                    }}
-                    className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-50"
-                  >
-                    {uploading ? '...' : 'Upload'}
-                  </button>
-                )}
-              </div>
+          <div className="bg-neutral-50 dark:bg-neutral-800/30 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-3">
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+              <Paperclip className="w-3 h-3" />
+              Attachment {initialData && initialData._count?.attachments ? `(${initialData._count.attachments})` : ''}
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx,.xlsx,.csv,.txt"
+                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                className="block w-full text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white dark:file:bg-white dark:file:text-black hover:file:opacity-90 cursor-pointer"
+              />
+              {uploadFile && (
+                <button
+                  type="button"
+                  disabled={uploading}
+                  onClick={async () => {
+                    if (!uploadFile || !initialData) return;
+                    setUploading(true);
+                    try {
+                      await onFileUpload!(initialData.id, uploadFile);
+                      setUploadFile(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                  className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-50"
+                >
+                  {uploading ? 'Uploading...' : 'Upload'}
+                </button>
+              )}
             </div>
-          )}
+          </div>
 
           <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-neutral-100 dark:border-neutral-800/60 shrink-0">
             <button
