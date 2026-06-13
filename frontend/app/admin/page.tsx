@@ -9,6 +9,9 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import AdminSidebar from '../../components/AdminSidebar';
 import { Users, ClipboardList, CheckCircle, Clock, AlertTriangle, LogOut, Activity, UserPlus, ListTodo, Shield, LogIn, Ban, UserCheck, Sun, Moon } from 'lucide-react';
 import ProfileDropdown from '../../components/ProfileDropdown';
+import EmptyState from '../../components/EmptyState';
+import ErrorState from '../../components/ErrorState';
+import { StatsCardSkeleton, Skeleton } from '../../components/SkeletonLoader';
 
 function actionIcon(action: string) {
   switch (action) {
@@ -82,12 +85,19 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {statsLoading ? (
-          <LoadingSpinner />
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <StatsCardSkeleton key={i} />
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Skeleton className="h-[300px] w-full rounded-xl" />
+              <Skeleton className="h-[300px] w-full rounded-xl lg:col-span-2" />
+            </div>
+          </>
         ) : statsError ? (
-          <div className="text-center py-12">
-            <p className="text-red-500 mb-4">{statsError}</p>
-            <button onClick={refetchStats} className="bg-neutral-900 text-white dark:bg-white dark:text-black px-4 py-2 rounded-md hover:opacity-90">Retry</button>
-          </div>
+          <ErrorState message={statsError} onRetry={refetchStats} className="mb-8" />
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
@@ -182,13 +192,17 @@ export default function AdminDashboard() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-neutral-500 text-sm py-8 text-center">No recent activity</p>
+                        <EmptyState icon={Activity} title="No recent activity" className="border-0 shadow-none py-8" />
                       )}
                     </>
                   ) : (
                     <>
                       {authLogsLoading ? (
-                        <LoadingSpinner />
+                        <div className="space-y-3">
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="flex gap-3"><Skeleton className="w-6 h-6 rounded-full shrink-0" /><div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/2" /><Skeleton className="h-3 w-1/3" /></div></div>
+                          ))}
+                        </div>
                       ) : authLogs.length > 0 ? (
                         <div className="space-y-3 max-h-[360px] overflow-y-auto">
                           {authLogs.map((log) => (
@@ -210,7 +224,7 @@ export default function AdminDashboard() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-neutral-500 text-sm py-8 text-center">No login activity recorded yet</p>
+                        <EmptyState icon={LogIn} title="No login activity" description="No login activity recorded yet." className="border-0 shadow-none py-8" />
                       )}
                     </>
                   )}

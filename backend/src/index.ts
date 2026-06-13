@@ -68,6 +68,13 @@ if (process.env.NODE_ENV !== 'test') {
   app.use('/api', apiLimiter);
 }
 
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Backend is running' });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Backend is healthy' });
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', tasksRoutes);

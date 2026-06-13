@@ -17,7 +17,10 @@ import TaskForm from '../../components/TaskForm';
 import TaskHistoryModal from '../../components/TaskHistoryModal';
 import AdminSidebar from '../../components/AdminSidebar';
 import ProfileDropdown from '../../components/ProfileDropdown';
-import { Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
+import EmptyState from '../../components/EmptyState';
+import ErrorState from '../../components/ErrorState';
+import { TableRowSkeleton } from '../../components/SkeletonLoader';
+import { Plus, Sun, Moon, LayoutGrid, List, Calendar, Edit2, Trash2, CheckCircle, AlertCircle, ClipboardList } from 'lucide-react';
 import { Task, CreateTaskRequest, UserOption } from '../../types';
 import clsx from 'clsx';
 
@@ -265,20 +268,34 @@ export default function TasksPage() {
         ) : (
           <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 shadow-sm overflow-hidden flex flex-col min-h-0">
             {tasksLoading ? (
-              <div className="py-24">
-                <LoadingSpinner />
+              <div className="w-full text-left border-collapse text-sm whitespace-nowrap overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-neutral-200 dark:border-neutral-850 bg-neutral-50 dark:bg-neutral-900/50 text-neutral-500 dark:text-neutral-400 font-medium">
+                      <th className="py-3.5 px-6 font-semibold">Title</th>
+                      <th className="py-3.5 px-4 font-semibold">Status</th>
+                      <th className="py-3.5 px-4 font-semibold">Priority</th>
+                      <th className="py-3.5 px-4 font-semibold">Due Date</th>
+                      {user?.role === 'ADMIN' && <th className="py-3.5 px-4 font-semibold">Creator</th>}
+                      <th className="py-3.5 px-6 text-right font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100 dark:divide-neutral-850">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <TableRowSkeleton key={i} columns={user?.role === 'ADMIN' ? 6 : 5} />
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : tasksError ? (
-              <div className="text-center py-12">
-                <p className="text-red-500 mb-4">{tasksError}</p>
-                <button onClick={refetch} className="bg-neutral-900 text-white dark:bg-white dark:text-black px-4 py-2 rounded-md hover:opacity-90">
-                  Retry
-                </button>
-              </div>
+              <ErrorState message={tasksError} onRetry={refetch} className="m-8 border-0" />
             ) : tasks.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-neutral-500 dark:text-neutral-400 text-sm">No tasks found. Create one to get started.</p>
-              </div>
+              <EmptyState 
+                icon={ClipboardList} 
+                title="No tasks found" 
+                description="There are no tasks to display. Create a new task to get started." 
+                className="m-8 border-0 shadow-none" 
+              />
             ) : (
               <div className="overflow-x-auto min-h-0">
                 <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
