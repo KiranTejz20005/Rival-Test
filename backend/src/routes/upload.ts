@@ -5,18 +5,7 @@ import fs from 'fs';
 import { requireAuth } from '../middleware/auth';
 import prisma from '../utils/prisma';
 
-const uploadDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+const storage = multer.memoryStorage();
 
 const allowedExtensions = /\.(png|jpg|jpeg|gif|pdf|doc|docx|xlsx|csv|txt)$/i;
 const allowedMimes = [
@@ -95,7 +84,7 @@ router.post('/:taskId', requireAuth, (req: Request, res: Response, next: NextFun
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      path: req.file.filename
+      data: req.file.buffer
     }
   });
 
@@ -137,12 +126,22 @@ router.delete('/:attachmentId', requireAuth, async (req: Request, res: Response)
     return res.status(403).json({ error: 'Forbidden', status: 403, timestamp: new Date().toISOString() });
   }
 
-  const filePath = path.join(uploadDir, attachment.path);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
   await prisma.attachment.delete({ where: { id: attachmentId } });
 
   res.json({ message: 'Attachment deleted' });
+});
+
+router.get('/:attachmentId/download', async (req: Request, res: Response) => {
+  const { attachmentId } = req.params;
+
+  const attachment = await prisma.attachment.findUnique({ where: { id: attachmentId } });
+  if (!attachment) {
+    return res.status(404).json({ error: 'Attachment not found' });
+  }
+
+  res.setHeader('Content-Type', attachment.mimeType);
+  res.setHeader('Content-Disposition', `inline; filename="${attachment.originalName}"`);
+  res.send(attachment.data);
 });
 
 export default router;

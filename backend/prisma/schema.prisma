@@ -119,7 +119,7 @@ model Attachment {
   originalName String
   mimeType     String
   size         Int
-  path         String
+  data         Bytes
   createdAt    DateTime @default(now())
 
   task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)

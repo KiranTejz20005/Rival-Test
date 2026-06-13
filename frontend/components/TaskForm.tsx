@@ -184,7 +184,7 @@ export default function TaskForm({ initialData, onSubmit, onClose, users, isAdmi
               <div className="space-y-2 mb-3">
                 {initialData.attachments.map(att => {
                   const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
-                  const fileUrl = `${baseUrl}/api/uploads/${att.path}`;
+                  const fileUrl = `${baseUrl}/api/attachments/${att.id}/download`;
                   const isImageOrPdf = att.mimeType === 'application/pdf' || att.mimeType.startsWith('image/');
                   const isDoc = att.mimeType.includes('msword') || att.mimeType.includes('wordprocessingml.document');
                   const previewUrl = isDoc 

@@ -86,8 +86,7 @@ export const getTasks = async (userId: string, role: string, filters: TaskFilter
             originalName: true,
             mimeType: true,
             size: true,
-            createdAt: true,
-            path: true
+            createdAt: true
           },
           orderBy: { createdAt: 'desc' }
         }

@@ -125,6 +125,5 @@ export interface Attachment {
   originalName: string;
   mimeType: string;
   size: number;
-  path: string;
   createdAt: string;
 }

@@ -68,7 +68,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.use('/api', apiLimiter);
 }
 
-app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/admin', adminRoutes);
